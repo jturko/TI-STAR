@@ -37,7 +37,7 @@ CPPFLAGS += -O0 -Wall -Wno-write-strings -Wno-deprecated -pedantic -g $(INCFLAGS
 CPPFLAGS += -pthread
 CPPFLAGS += -DG4MULTITHREADED
 LDFLAGS  += $(ROOTLIBS) -Wl,--no-as-needed $(G4TMP)/$(G4SYSTEM)/$(G4TARGET)/Dictionary.o -lG4OpenGL
-EXTRALIBS = -L$(MBLIB) -L$(LIB_DIR) -lMiniBall -lCommandLineInterface
+EXTRALIBS = -L$(MBLIB) -L$(LIB_DIR) -lMiniBall -lCommandLineInterface -lG4gl2ps
 
 
 EXTRA_LINK_DEPENDENCIES = $(G4TMP)/$(G4SYSTEM)/$(G4TARGET)/Dictionary.o

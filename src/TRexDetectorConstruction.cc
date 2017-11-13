@@ -68,10 +68,10 @@ void TRexDetectorConstruction::ConstructTarget() {
 	// experimental hall material
 	G4Material* targetMaterial = TRexMaterials::Get()->GetMaterial("target");
 
-	G4double innerRadius = 0.0*mm;
+	G4double innerRadius = 0.0*CLHEP::mm;
 	G4double outerRadius = TRexSettings::Get()->GetTargetDiameter()/2.;
-	G4double startAngle = 0.*deg;
-	G4double spanningAngle = 360.*deg;
+	G4double startAngle = 0.*CLHEP::deg;
+	G4double spanningAngle = 360.*CLHEP::deg;
 	G4double halfThickness = TRexSettings::Get()->GetTargetPhysicalLength()/2;
 	
 	// ################### Target Entrance Foil added by Leila begin ###################
@@ -102,8 +102,8 @@ void TRexDetectorConstruction::ConstructTarget() {
 	G4double targetMantelFoilHalfThickness = TRexSettings::Get()->GetTargetPhysicalLength()/2;
 	G4double targetMantelinnerRadius = TRexSettings::Get()->GetTargetDiameter()/2.;
 	G4double targetMantelouterRadius = TRexSettings::Get()->GetTargetDiameter()/2. + TRexSettings::Get()->GetFBarrelDeltaESingleFoilThickness()/2.;
-	G4double targetMantelstartAngle = 0.*deg;
-	G4double targetMantelspanningAngle = 360.*deg;			
+	G4double targetMantelstartAngle = 0.*CLHEP::deg;
+	G4double targetMantelspanningAngle = 360.*CLHEP::deg;			
 	
 	G4Tubs* targetMantelFoil_tube = new G4Tubs("targetMantelFoil",
 			targetMantelinnerRadius, targetMantelouterRadius,
@@ -137,9 +137,9 @@ void TRexDetectorConstruction::ConstructTarget() {
 	if(targetMaterial->GetState() == kStateGas) {
 		TRexSettings::Get()->SetTargetThickness(target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2)));
 		TRexSettings::Get()->SetTargetMaterialDensity(target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2)*2.*halfThickness));
-		std::cout<<"Built gas target with pressure "<<targetMaterial->GetPressure()/bar*1000.<<" mbar, and "<<2.*halfThickness/cm<<" cm length => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(mg/cm2)<<" mg/cm2"<<" target mass from file: "<<target_log->GetMass()<<std::endl;
+		std::cout<<"Built gas target with pressure "<<targetMaterial->GetPressure()/CLHEP::bar*1000.<<" mbar, and "<<2.*halfThickness/CLHEP::cm<<" cm length => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(CLHEP::mg/CLHEP::cm2)<<" mg/cm2"<<" target mass from file: "<<target_log->GetMass()<<std::endl;
 	} else {
-		std::cout<<"Built solid target with thickness "<<2.*halfThickness/um<<" um => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(mg/cm2)<<" mg/cm2 and density "<<TRexSettings::Get()->GetTargetMaterialDensity()/(g/cm3)<<" g/cm3"<<std::endl;
+	  std::cout<<"Built solid target with thickness "<<2.*halfThickness/CLHEP::um<<" um => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(CLHEP::mg/CLHEP::cm2)<<" mg/cm2 and density "<<TRexSettings::Get()->GetTargetMaterialDensity()/(CLHEP::g/CLHEP::cm3)<<" g/cm3"<<std::endl;
 	}		
 	
 }
@@ -180,9 +180,9 @@ void TRexDetectorConstruction::ConstructExperimentalHall() {
 	/////////////////////////////////////////////////////////////////////////////
 	// experimental hall
 	/////////////////////////////////////////////////////////////////////////////
-	G4double expHall_x = 1.0*m;
-	G4double expHall_y = 1.0*m;
-	G4double expHall_z = 1.0*m;
+	G4double expHall_x = 1.0*CLHEP::m;
+	G4double expHall_y = 1.0*CLHEP::m;
+	G4double expHall_z = 1.0*CLHEP::m;
 
 	fExperimentalHall_box = new G4Box("expHall_box",
 			expHall_x,expHall_y,expHall_z);
@@ -303,7 +303,7 @@ void TRexDetectorConstruction::DefineMiniball() {
 			TRexSettings::Get()->GetMiniballClusterTheta(), TRexSettings::Get()->GetMiniballClusterPhi(), TRexSettings::Get()->GetMiniballClusterSpin(),
 			MiniballCapsule, MiniballCryoWall);
 
-	fMiniball->SetAllDeadlayer(0.7*micrometer, DEADLAYER_OUTER_CONTACT);
+	fMiniball->SetAllDeadlayer(0.7*CLHEP::micrometer, DEADLAYER_OUTER_CONTACT);
 
 /*		for(i = 0; i < 8; i++) {
 		if(data->settings->MiniballRelativeEfficiency[i][0] > 0.) {

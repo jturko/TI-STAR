@@ -79,7 +79,7 @@ int main(int argc,char** argv) {
   MiniBallRootGenerator* miniballHistoGen = new MiniBallRootGenerator(data.GetOutputFileName(), 5);
   MiniBallHistoManager* miniballHistoManager = new MiniBallHistoManager(miniballHistoGen);
   miniballHistoManager->SetMBTupleType(EVENT);
-  miniballHistoManager->SetEnergyUnit(keV);
+  miniballHistoManager->SetEnergyUnit(CLHEP::keV);
 
   // set mandatory initialization classes  //
   G4VUserDetectorConstruction* detector = new TRexDetectorConstruction(miniballHistoManager);

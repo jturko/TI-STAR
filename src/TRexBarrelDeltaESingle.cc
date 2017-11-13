@@ -225,9 +225,9 @@ void TRexBarrelDeltaESingle::ConstructDeadLayer(G4LogicalVolume* experimentalHal
 void TRexBarrelDeltaESingle::ConstructFoil(G4LogicalVolume* experimentalHall_log) {
 	G4Material* foilMaterial = TRexMaterials::Get()->GetMaterial("mylar");
 
-	G4double foilDistance = (1.0 + 2.0) * mm;
+	G4double foilDistance = (1.0 + 2.0) * CLHEP::mm;
 	G4double foilWidth = (TRexSettings::Get()->GetBBarrelDeltaESingleDistanceToBeam()[fId] - 1 * (foilDistance - fFoilThickness / 2.)) * 2;
-	G4double foilLength = 4 * mm;
+	G4double foilLength = 4 * CLHEP::mm;
 
 	if(fDirection == "forward") {
 		foilLength += TRexSettings::Get()->GetFBarrelDeltaESingleLengthY();
