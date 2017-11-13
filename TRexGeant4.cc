@@ -49,8 +49,6 @@
 
 #include "Randomize.hh"
 
-static __thread int foo;
-
 int main(int argc,char** argv) {
   // class to organize command line
   TRexData data(argc, argv);
