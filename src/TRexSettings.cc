@@ -410,7 +410,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 		fMiniballClusterPhi.push_back(sett.GetValue(Form("MiniballCluster.Phi.%i", clu), 0.) * CLHEP::degree);
 		fMiniballClusterSpin.push_back(sett.GetValue(Form("MiniballCluster.Spin.%i", clu), 0.) * CLHEP::degree);
 	}
-	fMiniballEnergyResolutionCore = sett.GetValue("MiniballEnergyResolutionCore", 2.4) * keV;
+	fMiniballEnergyResolutionCore = sett.GetValue("MiniballEnergyResolutionCore", 2.4) * CLHEP::keV;
 	fMiniballEnergyResolutionSegment = sett.GetValue("MiniballEnergyResolutionSegment", 1.9) * CLHEP::keV;
 }
 

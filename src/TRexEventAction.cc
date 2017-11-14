@@ -115,8 +115,8 @@ void TRexEventAction::MiniballEndOfEventAction(const G4Event* evt) {
 				// energy deposited in the detector
 				G4double Edep = (*HPGeHC)[hit_nb]->GetEdep();
 
-				// if(Edep > 2000*keV) {
-				// 	cout << "Edep = " << Edep / keV << " , nbOfHits in detector " << id << " (clu = " << id / 3 << " , cry = " << id % 3 << ") : " << HPGeHC->entries() << endl;
+				// if(Edep > 2000*CLHEP::keV) {
+				// 	cout << "Edep = " << Edep / CLHEP::keV << " , nbOfHits in detector " << id << " (clu = " << id / 3 << " , cry = " << id % 3 << ") : " << HPGeHC->entries() << endl;
 				// }
 
 				if(Edep > 0) {
@@ -188,16 +188,16 @@ void TRexEventAction::CollectMiniballData() {
 
 			// check if crystal was hit
 			if((*detectors)[det]->CoreEnAccu > 0) {
-				Cluster.SetCore(cry, (*detectors)[det]->CoreEnAccu/keV, time);
+				Cluster.SetCore(cry, (*detectors)[det]->CoreEnAccu/CLHEP::keV, time);
 
-				//cout << "coreE = " << (*detectors)[det]->CoreEnAccu/keV << endl;
+				//cout << "coreE = " << (*detectors)[det]->CoreEnAccu/CLHEP::keV << endl;
 
 				// loop over all segments
 				for(int seg = 0; seg < NB_OF_SEGMENTS; seg++) {
 					// check if segment was hit
 					if((*detectors)[det]->SegmentEnAccu[seg] > 0) {
-						//cout << "segE = " << (*detectors)[det]->SegmentEn[seg]/keV << endl;
-						Cluster.SetSegment(cry, seg, (*detectors)[det]->SegmentEnAccu[seg]/keV,time);
+						//cout << "segE = " << (*detectors)[det]->SegmentEn[seg]/CLHEP::keV << endl;
+						Cluster.SetSegment(cry, seg, (*detectors)[det]->SegmentEnAccu[seg]/CLHEP::keV,time);
 					}
 				}
 				fMiniballHit = true;

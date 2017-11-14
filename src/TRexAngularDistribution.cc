@@ -115,14 +115,14 @@ void TRexAngularDistribution::SetEjectileAndRecoil() {
 void TRexAngularDistribution::ShootThetaCm(int levelNb) {
 	// get a random number (thetaCM) distributed according the histogram bin contents, i.e. the cross section sigma * sin(thetaCM)
 	if(fReaction < fNbOfLevels) {
-		fThetaCM = fHistos[levelNb].GetRandom() * rad;
+		fThetaCM = fHistos[levelNb].GetRandom() * CLHEP::rad;
 	} else {
 		// normalization constant
-		double norm = 1./  (1./(sin(fThetaCM_min/rad * 0.5) * sin(fThetaCM_min/rad * 0.5)) -1);
+		double norm = 1./  (1./(sin(fThetaCM_min/CLHEP::rad * 0.5) * sin(fThetaCM_min/CLHEP::rad * 0.5)) -1);
 		G4double rand = CLHEP::RandFlat::shoot(0., 1.);
 		fThetaCM = 2.* asin(1. / sqrt(1. / sin(fThetaCM_min*0.5) / sin(fThetaCM_min*0.5) - rand / norm));
 
-		//std::cout << "fThetaCM = " << fThetaCM / degree << std::endl;
+		//std::cout << "fThetaCM = " << fThetaCM / CLHEP::degree << std::endl;
 	}
 }
 
@@ -169,29 +169,29 @@ void TRexAngularDistribution::ShootReactionTypeAndExcitationEnergy() {
 }
 
 void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
-	//fThetaCM = 70. * degree;
+	//fThetaCM = 70. * CLHEP::degree;
 
 	// particle momentum direction
-	fEjectilePhi = CLHEP::RandFlat::shoot(-M_PI, M_PI) * rad;
-	//fEjectilePhi = 80.0 * degree;
+	fEjectilePhi = CLHEP::RandFlat::shoot(-M_PI, M_PI) * CLHEP::rad;
+	//fEjectilePhi = 80.0 * CLHEP::degree;
 	fRecoilPhi = -fEjectilePhi;
 
 	//std::cout << "fReaction = " << fReaction << ": projectile = " << fProjectile.A() << " , target = " << fTarget.A()
 	//		<< " , ejectile = " << fEjectile.A() << " , recoil = " << fRecoil.A() << std::endl;
 
 	// set ejectile energy and thetaLab
-	fKinematics->orbits(&fProjectile, &fTarget, &fRecoil, &fEjectile, fReactionEnergy / MeV, fThetaCM / degree, fExcitationEnergy / MeV,
+	fKinematics->orbits(&fProjectile, &fTarget, &fRecoil, &fEjectile, fReactionEnergy / CLHEP::MeV, fThetaCM / CLHEP::degree, fExcitationEnergy / CLHEP::MeV,
 			0, fEjectileEnergy, fEjectileTheta);
 
-	fEjectileEnergy *= MeV;
-	fEjectileTheta *= radian;
+	fEjectileEnergy *= CLHEP::MeV;
+	fEjectileTheta *= CLHEP::radian;
 
 	// set recoil energy and thetaLab
-	fKinematics->orbits(&fProjectile, &fTarget, &fRecoil, &fEjectile, fReactionEnergy / MeV, fThetaCM / degree, fExcitationEnergy / MeV,
+	fKinematics->orbits(&fProjectile, &fTarget, &fRecoil, &fEjectile, fReactionEnergy / CLHEP::MeV, fThetaCM / CLHEP::degree, fExcitationEnergy / CLHEP::MeV,
 			1, fRecoilEnergy, fRecoilTheta);
 
-	fRecoilEnergy *= MeV;
-	fRecoilTheta *= radian;
+	fRecoilEnergy *= CLHEP::MeV;
+	fRecoilTheta *= CLHEP::radian;
 
 	//G4std::cout << "fReactionEnergy = " << fReactionEnergy << std::endl;
 	//G4std::cout << "fThetaCM  = " << fThetaCM << std::endl;
@@ -218,7 +218,7 @@ void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
 		// travel length of the ejectile through the target
 		G4double travelLength;
 
-		if(fEjectileTheta / degree < 90*degree) {
+		if(fEjectileTheta / CLHEP::degree < 90*CLHEP::degree) {
 			travelLength = 1. / fabs(cos(fEjectileTheta)) *
 				(TRexSettings::Get()->GetTargetThickness() - (fReactionZ * TRexSettings::Get()->GetTargetMaterialDensity() + TRexSettings::Get()->GetTargetThickness() / 2.));
 		} else {
@@ -227,10 +227,10 @@ void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
 		}
 
 		// energy loss of the ejectile in the target
-		Kinematic targetreco(&fEjectile, fTargetMaterial, travelLength / (mg/cm2));
-		G4double energyAfterTarget = fEjectileEnergy - targetreco.EnergyLoss(fEjectileEnergy / MeV) * MeV;
+		Kinematic targetreco(&fEjectile, fTargetMaterial, travelLength / (CLHEP::mg/CLHEP::cm2));
+		G4double energyAfterTarget = fEjectileEnergy - targetreco.EnergyLoss(fEjectileEnergy / CLHEP::MeV) * CLHEP::MeV;
 
-		//std::cout << "energyMiddle = " << fEjectileEnergy << " , energyLoss = " << targetreco.EnergyLoss(fEjectileEnergy / MeV) << " , energy after = " << energyAfterTarget << std::endl;
+		//std::cout << "energyMiddle = " << fEjectileEnergy << " , energyLoss = " << targetreco.EnergyLoss(fEjectileEnergy / CLHEP::MeV) << " , energy after = " << energyAfterTarget << std::endl;
 
 		ejectileMomentumVectorLab.setRThetaPhi(fKinematics->Momentum(energyAfterTarget, fEjectileRestMass), fEjectileTheta, fEjectilePhi);
 		fEjectileLabAfterTarget.setE(fEjectileRestMass + energyAfterTarget);
@@ -345,7 +345,7 @@ void TRexAngularDistribution::FillAngularDistributionHistos() {
 		for(double theta = thetaMin; theta < thetaMax + binWidth; theta += binWidth) {
 			sigma = fGraphsSin[i].Eval(theta);
 
-			if(theta >  fThetaCM_min / rad) {
+			if(theta >  fThetaCM_min / CLHEP::rad) {
 				// fill histogram
 				fHistos[i].Fill(theta, sigma);
 			}
@@ -362,18 +362,18 @@ void TRexAngularDistribution::FillAngularDistributionHistos() {
 
 void TRexAngularDistribution::CalculateArealDensity() {
 	if(fTargetMaterial->NumberOfElements() == 1) {
-		fArealDensity.push_back(TRexSettings::Get()->GetTargetThickness() * CLHEP::Avogadro / (fTargetMaterial->GetElement(0)->A() * g/mole));
+	  fArealDensity.push_back(TRexSettings::Get()->GetTargetThickness() * CLHEP::Avogadro / (fTargetMaterial->GetElement(0)->A() * CLHEP::g/CLHEP::mole));
 	} else {
 		double atomicRatio[2] = {1.0, TRexSettings::Get()->GetTargetAtomicRatio()};
 
 		for(size_t i = 0; i < fTargetMaterial->NumberOfElements(); ++i) {
 			fArealDensity.push_back(atomicRatio[i] * TRexSettings::Get()->GetTargetThickness() * CLHEP::Avogadro /
-					(fTargetMaterial->GetElement(0)->A() * g/mole + TRexSettings::Get()->GetTargetAtomicRatio() * fTargetMaterial->GetElement(1)->A() * g/mole));
+						(fTargetMaterial->GetElement(0)->A() * CLHEP::g/CLHEP::mole + TRexSettings::Get()->GetTargetAtomicRatio() * fTargetMaterial->GetElement(1)->A() * CLHEP::g/CLHEP::mole));
 		}
 	}
 
 	for(size_t i = 0; i < fTargetMaterial->NumberOfElements(); ++i) {
-		std::cout << "Areal density[" << i << "] = " << fArealDensity[i] *cm2 << " / cm2" << std::endl;
+		std::cout << "Areal density[" << i << "] = " << fArealDensity[i] *CLHEP::cm2 << " / cm2" << std::endl;
 	}
 }
 
@@ -383,34 +383,34 @@ void TRexAngularDistribution::CalculateCrossSectionIntegral() {
 	for(unsigned int i = 0; i < fGraphsSin.size(); i++) {
 		firstPoint = 0;
 
-		while(fGraphsSin[i].GetX()[firstPoint] < fThetaCM_min / rad - 0.00001) {
+		while(fGraphsSin[i].GetX()[firstPoint] < fThetaCM_min / CLHEP::rad - 0.00001) {
 			firstPoint ++;
 		}
 
-		std::cout << "first Point = " << fGraphsSin[i].GetX()[firstPoint] << " , fThetaCM_min = " << fThetaCM_min / rad << std::endl;
+		std::cout << "first Point = " << fGraphsSin[i].GetX()[firstPoint] << " , fThetaCM_min = " << fThetaCM_min / CLHEP::rad << std::endl;
 
-		fCrossSectionIntegral.push_back(fGraphsSin[i].Integral(firstPoint, -1) * millibarn);
-		std::cout << "fCrossSectionIntegral[" << i << "] = " << fCrossSectionIntegral[i] / millibarn << std::endl;
+		fCrossSectionIntegral.push_back(fGraphsSin[i].Integral(firstPoint, -1) * CLHEP::millibarn);
+		std::cout << "fCrossSectionIntegral[" << i << "] = " << fCrossSectionIntegral[i] / CLHEP::millibarn << std::endl;
 	}
 
 	// elastic scattering (using Rutherford scattering)
 	for(size_t i = 0; i < fTargetMaterial->NumberOfElements(); ++i) {
 		// Rutherford factor
-		G4double RF = fProjectileZ * fTargetMaterial->Z(i) * eplus * eplus / (16. * M_PI * CLHEP::epsilon0);
+	  G4double RF = fProjectileZ * fTargetMaterial->Z(i) * CLHEP::eplus * CLHEP::eplus / (16. * M_PI * CLHEP::epsilon0);
 		RF *= RF;
 
-		G4double fBeamEnergyMiddleTarget = fEnergyVsTargetDepth.Eval(TRexSettings::Get()->GetTargetThickness() / 2. /(mg/cm2))*MeV;
+		G4double fBeamEnergyMiddleTarget = fEnergyVsTargetDepth.Eval(TRexSettings::Get()->GetTargetThickness() / 2. /(CLHEP::mg/CLHEP::cm2))*CLHEP::MeV;
 
-		//std::cout << "fBeamEnergyMiddleTarget = " << fBeamEnergyMiddleTarget / MeV << std::endl;
+		//std::cout << "fBeamEnergyMiddleTarget = " << fBeamEnergyMiddleTarget / CLHEP::MeV << std::endl;
 
 		// total energy in the CM frame in the middle of the target
 		G4double E_CM = fBeamEnergyMiddleTarget * fTargetMaterial->Mass(i) / (fProjectileRestMass + fTargetMaterial->Mass(i));
 
-		//std::cout << "Ecm = " << E_CM / MeV << std::endl;
+		//std::cout << "Ecm = " << E_CM / CLHEP::MeV << std::endl;
 
-		fCrossSectionIntegral.push_back(-4. * M_PI * RF / (E_CM * E_CM) * (1. - 1./ (sin(fThetaCM_min / radian *0.5) * sin(fThetaCM_min / radian * 0.5))));
+		fCrossSectionIntegral.push_back(-4. * M_PI * RF / (E_CM * E_CM) * (1. - 1./ (sin(fThetaCM_min / CLHEP::radian *0.5) * sin(fThetaCM_min / CLHEP::radian * 0.5))));
 
-		std::cout << "elastic: fCrossSectionIntegral[" << i << "] = " << fCrossSectionIntegral[i + fGraphsSin.size()] / millibarn << std::endl;
+		std::cout << "elastic: fCrossSectionIntegral[" << i << "] = " << fCrossSectionIntegral[i + fGraphsSin.size()] / CLHEP::millibarn << std::endl;
 	}
 }
 
@@ -426,12 +426,12 @@ void TRexAngularDistribution::CalculateScatteringProbability() {
 	//			if(index < fNbOfLevels) {
 	//				ScatteringProbability[index] = ScatteringProbability[index-1] +  fArealDensity[targetMaterial.NumberOfElements()-1] * fCrossSectionIntegral[index];
 	//
-	//				std::cout << "index = " << index << " , fArealDensity = " << fArealDensity[targetMaterial.NumberOfElements()-1] * cm2  << " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / millibarn << std::endl;
+	//				std::cout << "index = " << index << " , fArealDensity = " << fArealDensity[targetMaterial.NumberOfElements()-1] * CLHEP::cm2  << " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / CLHEP::millibarn << std::endl;
 	//			}
 	//			else{ // elastic cross sections
 	//				ScatteringProbability[index] = ScatteringProbability[index-1] +  fArealDensity[index - fNbOfLevels] * fCrossSectionIntegral[index];
 	//
-	//				std::cout << "index = " << index << " , fArealDensity = " << fArealDensity[index - fNbOfLevels] * cm2 << " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / millibarn << std::endl;
+	//				std::cout << "index = " << index << " , fArealDensity = " << fArealDensity[index - fNbOfLevels] * CLHEP::cm2 << " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / CLHEP::millibarn << std::endl;
 	//			}
 	//			std::cout << "ScatteringProbability(transfer)[" << index << "] = " << ScatteringProbability[index] << std::endl;
 	//		}
@@ -456,12 +456,12 @@ void TRexAngularDistribution::CalculateScatteringProbability() {
 			fScatteringProbabilitySingle.push_back(fScatteringProbabilitySingle[index-1] +
 					fArealDensity[fTargetMaterial->NumberOfElements()-1] * fCrossSectionIntegral[index]);
 
-			std::cout << "index for transfer(leila) = " << index << "fTargetMaterial->NumberOfElements(leila):"<<fTargetMaterial->NumberOfElements()<<" , fArealDensity = " << fArealDensity[fTargetMaterial->NumberOfElements()-1] * cm2
-				<< " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / millibarn << std::endl;
+			std::cout << "index for transfer(leila) = " << index << "fTargetMaterial->NumberOfElements(leila):"<<fTargetMaterial->NumberOfElements()<<" , fArealDensity = " << fArealDensity[fTargetMaterial->NumberOfElements()-1] * CLHEP::cm2
+				<< " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / CLHEP::millibarn << std::endl;
 		} else { // elastic Rutherford cross sections
 			fScatteringProbabilitySingle.push_back(fScatteringProbabilitySingle[index-1] +  fArealDensity[index - fNbOfLevels] * fCrossSectionIntegral[index]);
 
-			std::cout << "index for elastic(leila)= " << index << " , fArealDensity = " << fArealDensity[index - fNbOfLevels] * cm2 << " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / millibarn << std::endl;
+			std::cout << "index for elastic(leila)= " << index << " , fArealDensity = " << fArealDensity[index - fNbOfLevels] * CLHEP::cm2 << " , fCrossSectionIntegral = " << fCrossSectionIntegral[index] / CLHEP::millibarn << std::endl;
 		}
 		std::cout << "ScatteringProbability(transfer)[" << index << "] = " << fScatteringProbabilitySingle[index] << std::endl;
 	}
@@ -470,10 +470,10 @@ void TRexAngularDistribution::CalculateScatteringProbability() {
 	fScatteringProbability = fScatteringProbabilitySingle[fNbOfLevels - 1] * TRexSettings::Get()->GetTransferOrCoulexProbability() +
 		fScatteringProbabilitySingle[fNbOfLevels + fTargetMaterial->NumberOfElements() - 1] * (1 - TRexSettings::Get()->GetTransferOrCoulexProbability());
 
-	if(fThetaCM < 0.00001 * degree) {
+	if(fThetaCM < 0.00001 * CLHEP::degree) {
 		fScatteringProbability = fScatteringProbabilitySingle[fNbOfLevels - 1] * TRexSettings::Get()->GetTransferOrCoulexProbability();
 	}
-	std::cout << "leila: "<<0.00001 * degree<<" ScatteringProbabilityTree total(leila) = " << fScatteringProbability << " = ? "<< fScatteringProbabilitySingle[fNbOfLevels - 1] * TRexSettings::Get()->GetTransferOrCoulexProbability() << std::endl;// commented in by Leila 28.07.2017
+	std::cout << "leila: "<<0.00001 * CLHEP::degree<<" ScatteringProbabilityTree total(leila) = " << fScatteringProbability << " = ? "<< fScatteringProbabilitySingle[fNbOfLevels - 1] * TRexSettings::Get()->GetTransferOrCoulexProbability() << std::endl;// commented in by Leila 28.07.2017
 }
 
 
@@ -519,10 +519,10 @@ void TRexAngularDistribution::ReadLevelFile() {
 
 		file >> fLevelEnergy[i] >> fFeedingProbability[i] >> fLevelSpin[i] >> fLevelParity[i] >> fNbOfDecays[i];
 
-		fLevelEnergy[i] *= keV;
+		fLevelEnergy[i] *= CLHEP::keV;
 		totalFeedingProbability += fFeedingProbability[i];
 
-		std::cout << "E[" << i << "] = " << fLevelEnergy[i] / keV << " , feeding Prob = " << fFeedingProbability[i] << " , spin = " << fLevelSpin[i]
+		std::cout << "E[" << i << "] = " << fLevelEnergy[i] / CLHEP::keV << " , feeding Prob = " << fFeedingProbability[i] << " , spin = " << fLevelSpin[i]
 			<< " , parity = " << fLevelParity[i] << " , nbOfDecays = " << fNbOfDecays[i] << std::endl;
 
 		for(int ii = 0; ii < fNbOfDecays[i]; ii++) {
