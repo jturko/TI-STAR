@@ -33,6 +33,7 @@ class TRexMaterials {
 		G4Material* BuildC4F10(void);
 		G4Material* BuildC4F10_noOptical(void);
 		G4Material* BuildDeuterium(void);
+		G4Material* BuildHelium(void); // added by Leila
 		G4Material* BuildDeuteratedPE(void);
 		G4Material* BuildSolidDeuterium(void);
 
@@ -54,6 +55,7 @@ class TRexMaterials {
 
 		G4Element* fElH;
 		G4Element* fElD;
+		G4Element* fElHe; // added by Leila
 		G4Element* fElC;
 		G4Element* fElN;
 		G4Element* fElO;

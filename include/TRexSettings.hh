@@ -62,6 +62,7 @@ class TRexSettings : public TObject {
 		std::string GetLevelFile() { return fLevelFile; }
 		std::string GetAngularDistributionFile() { return fAngularDistributionFile; }
 		std::string GetMassFile() { return fMassFile; }
+		std::string GetCrossSectionFile() { return fCrossSectionFile; } // Leila
 
 		// alpha source  parameters
 		double GetAlphaSourceDiameter() { return fAlphaSourceDiameter; }
@@ -381,6 +382,7 @@ class TRexSettings : public TObject {
 		std::string fLevelFile;
 		std::string fAngularDistributionFile;
 		std::string fMassFile;
+		std::string fCrossSectionFile; // Leila
 
 		double fAlphaSourceDiameter;
 		double fAlphaSourceThickness;

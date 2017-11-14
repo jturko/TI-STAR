@@ -9,11 +9,13 @@ TRexStackingAction::TRexStackingAction(){
 	particleTable = G4ParticleTable::GetParticleTable();
 	
 	electronDef = nullptr;
+	
+	//out.open("electrons.dat", std::ios::app | std::ios::out);
 }
 
 TRexStackingAction::~TRexStackingAction()
 {   
-    //out.close();
+    out.close();
 }
 
 G4ClassificationOfNewTrack TRexStackingAction::ClassifyNewTrack(const G4Track* track){

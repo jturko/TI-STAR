@@ -105,10 +105,10 @@ G4bool TRexBarrelDeltaESingleSensitiveDetector::ProcessHits(G4Step *aStep,
 G4bool TRexBarrelDeltaESingleSensitiveDetector::ProcessHits_constStep(const G4Step * aStep,
 		G4TouchableHistory* ROHist) {
 	// only primary particle hits are considered (no secondaries)
-	//if(aStep->GetTrack()->GetParentID() != 0 || aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV) {
+	if(aStep->GetTrack()->GetParentID() != 0 || aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV) {
 	//using energy cut only, allows incoming beam to generate detectable
 	//particles
-	if (aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV){
+	//if (aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV){
 		return false;
 	}
 

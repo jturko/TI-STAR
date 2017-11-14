@@ -11,7 +11,7 @@
 #include "TRexAngularDistribution.hh"
 #include "TRexSettings.hh"
 
-// Leila: Flat reactionX/Y/Z distribution comes from TRexBeam.cc TRexBeam ::ShootReactionPosition() 
+// Leila: Flat reactionX/Y/Z distributions come from TRexBeam.cc TRexBeam ::ShootReactionPosition() 
 
 TRexAngularDistribution::TRexAngularDistribution() :
 	fScatteringProbabilitySingle(0) {
@@ -22,6 +22,9 @@ TRexAngularDistribution::TRexAngularDistribution() :
 	// write the given angular distribution from the text file into Root histograms
 	FillAngularDistributionGraphs();
 	FillAngularDistributionHistos();
+	FillCrossSectionGraph(); // Leila
+	
+	//fEventCounter;
 }
 
 TRexAngularDistribution::~TRexAngularDistribution() {
@@ -35,11 +38,8 @@ void TRexAngularDistribution::GeneratePrimaries(G4Event *anEvent) {
 		
 		fTargetMaterial = GetTargetMaterial();
 		std::cout << "TargetMaterialName for energy loss calculation in the target = " << fTargetMaterial->Name() << std::endl;
-		
-		fKinematics = new Kinematic(&fProjectile, fTargetMaterial, TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2));
-		
-		fEnergyVsTargetDepth = *(fKinematics->EnergyVsThickness(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
-				
+			fKinematics = new Kinematic(&fProjectile, fTargetMaterial, TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2));
+			fEnergyVsTargetDepth = *(fKinematics->EnergyVsThickness(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
 		isDefined = true;
 		
 		// calculate scattering probability
@@ -52,9 +52,11 @@ void TRexAngularDistribution::GeneratePrimaries(G4Event *anEvent) {
 	fGammaTheta->resize(0);
 	fGammaPhi->resize(0);
 	fGammaEnergy->resize(0);
-
+	
 	// shoot the emission point
 	ShootReactionPosition();
+	
+
 
 	// calculate reaction energy in the target
 	CalculateReactionEnergyInTheTarget();
@@ -176,9 +178,8 @@ void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
 	//fEjectilePhi = 80.0 * CLHEP::degree;
 	fRecoilPhi = -fEjectilePhi;
 
-	//std::cout << "fReaction = " << fReaction << ": projectile = " << fProjectile.A() << " , target = " << fTarget.A()
-	//		<< " , ejectile = " << fEjectile.A() << " , recoil = " << fRecoil.A() << std::endl;
-
+	//std::cout << "fReaction = " << fReaction << ": projectile = " << fProjectile.A() << " , target = " << fTarget.A() << " , ejectile = " << fEjectile.A() << " , recoil = " << fRecoil.A() << std::endl;
+	//std::cout << "fThetaCM before orbit = " << fThetaCM << std::endl;
 	// set ejectile energy and thetaLab
 	fKinematics->orbits(&fProjectile, &fTarget, &fRecoil, &fEjectile, fReactionEnergy / CLHEP::MeV, fThetaCM / CLHEP::degree, fExcitationEnergy / CLHEP::MeV,
 			0, fEjectileEnergy, fEjectileTheta);
@@ -193,10 +194,10 @@ void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
 	fRecoilEnergy *= CLHEP::MeV;
 	fRecoilTheta *= CLHEP::radian;
 
-	//G4std::cout << "fReactionEnergy = " << fReactionEnergy << std::endl;
-	//G4std::cout << "fThetaCM  = " << fThetaCM << std::endl;
-	//G4std::cout << "fEjectileTheta  = " << fEjectileTheta << std::endl;
-	//G4std::cout << "fRecoilTheta  = " << fRecoilTheta << std::endl;
+	/*std::cout << "fReactionEnergy = " << fReactionEnergy << std::endl;
+	std::cout << "fThetaCM after orbit  = " << fThetaCM << std::endl;
+	std::cout << "fEjectileTheta  = " << fEjectileTheta << std::endl;
+	std::cout << "fRecoilTheta  = " << fRecoilTheta << std::endl;*/
 
 	// set ejectile Lorentz vector
 	G4ThreeVector ejectileMomentumVectorLab;
@@ -272,7 +273,7 @@ void TRexAngularDistribution::FillAngularDistributionGraphs() {
 	std::ifstream file(TRexSettings::Get()->GetAngularDistributionFile().c_str());
 
 	if(file.bad()) {
-		std::cerr << "Unable to open " << TRexSettings::Get()->GetAngularDistributionFile() << "!\nexiting ... \n";
+		std::cerr << "Unable to open angular distribution file" << TRexSettings::Get()->GetAngularDistributionFile() << "!\nexiting ... \n";
 		exit(2);
 	} else {
 		std::cout << "\nReading angular distribution file " << TRexSettings::Get()->GetAngularDistributionFile() << " ... \n"<< std::endl;
@@ -285,19 +286,21 @@ void TRexAngularDistribution::FillAngularDistributionGraphs() {
 	for(size_t i = 0; i < fNbOfLevels; i++) {
 		file >> nbOfThetaAngles;
 	}
-	//std::cout << "nfOfThetaAngles = " << nbOfThetaAngles << std::endl;
+	std::cout << "nfOfThetaAngles = " << nbOfThetaAngles << std::endl;
 
 	std::vector<TVectorF> theta    = std::vector<TVectorF>(fNbOfLevels, TVectorF(nbOfThetaAngles));
 	std::vector<TVectorF> sigma    = std::vector<TVectorF>(fNbOfLevels, TVectorF(nbOfThetaAngles));
 	std::vector<TVectorF> thetaSin = std::vector<TVectorF>(fNbOfLevels, TVectorF(nbOfThetaAngles));
 	std::vector<TVectorF> sigmaSin = std::vector<TVectorF>(fNbOfLevels, TVectorF(nbOfThetaAngles));
+	
+	// for 30Mg(d,p) the sum of sigam_0 = 9671.96 mb, sigam_1 = 4851.86 mb, sigam_2 = 17505.3 --> sigma total = 3.202912e+04 mb
 
 	// loop over all lines
 	for(int th = 0; th < nbOfThetaAngles; th++) {
 		// loop over all states
 		for(size_t i = 0; i < fNbOfLevels; i++) {
 			file >> theta[i][th] >> sigma[i][th];
-			//std::cout << theta[i][th] << " " << sigma[i][th] << std::endl;
+
 			thetaSin[i][th] = theta[i][th] / 180 * TMath::Pi();
 			sigmaSin[i][th] = sigma[i][th] * sin(thetaSin[i][th]);
 			//std::cout << thetaSin[i][th] << " " << sigmaSin[i][th] << std::endl;
@@ -312,13 +315,13 @@ void TRexAngularDistribution::FillAngularDistributionGraphs() {
 
 	file.close();
 
-	//		TFile testFile("angDist.root", "recreate");
-	//		testFile.cd();
-	//
-	//		for(int i = 0; i < fNbOfLevels; i++) {
-	//			//fGraphs[i].SetName(Form("Graph_%i", i));
-	//			//fGraphs[i].Write();
-	//		}
+			/*TFile testFile("angDist.root", "recreate");
+			testFile.cd();
+	
+			for(int i = 0; i < fNbOfLevels; i++) {
+				fGraphsSin[i].SetName(Form("Graph_%i", i));
+				fGraphsSin[i].Write();
+			}*/
 }
 
 void TRexAngularDistribution::FillAngularDistributionHistos() {
@@ -338,7 +341,7 @@ void TRexAngularDistribution::FillAngularDistributionHistos() {
 		// create angular distribution histogram
 		fHistos.push_back(TH1F(Form("AngularDistributionHisto_%d", (int) i), Form("AngularDistributionHisto_%d", (int) i),
 					nbOfBins + 1, thetaMin - binWidth/2., thetaMax + binWidth/2.));
-
+//std::cout<<" theta max: " <<thetaMax<<" theta min: " <<thetaMin<<std::endl;
 		double sigma;
 
 		// loop over all theta angles and fill the histogram
@@ -352,13 +355,85 @@ void TRexAngularDistribution::FillAngularDistributionHistos() {
 		}
 	}
 
-	//		TFile testFile("angDistHisto.root", "recreate");
-	//		testFile.cd();
-	//
-	//		for(size_t i = 0; i < fNbOfLevels; i++) {
-	//			fHistos[i].Write();
-	//		}
+			/*TFile testFile("angDistHisto.root", "recreate");
+			testFile.cd();
+	
+			for(size_t i = 0; i < fNbOfLevels; i++) {
+				fHistos[i].Write();
+			}*/
 }
+
+/*void TRexAngularDistribution::FillCrossSectionGraph() {
+	std::ifstream file(TRexSettings::Get()->GetCrossSectionFile().c_str());
+
+	if(file.bad()) {
+		std::cerr << "Unable to open cross sectoin file" << TRexSettings::Get()->GetCrossSectionFile() << "!\nexiting ... \n";
+		exit(2);
+	} else {
+		std::cout << "\nReading cross section file " << TRexSettings::Get()->GetCrossSectionFile() << " ... \n"<< std::endl;
+	}
+
+
+	// number of energies = number of lines
+	//int nbOfBeamEnergyInCm;
+	int countsEbeamLA=0;
+    
+    //file.ignore(1000, '\n'); // ignore the first line
+     
+		file >> nbOfBeamEnergyInCm;
+
+	std::cout << "nbOfBeamEnergyInCm = " << nbOfBeamEnergyInCm << std::endl;
+	
+	// resize the vectors
+	fEbeamCm.resize(nbOfBeamEnergyInCm);
+	fsigmaForEbeamCm.resize(nbOfBeamEnergyInCm);
+	
+	// loop over all lines
+	for(int i = 0; i<nbOfBeamEnergyInCm; i++) {				
+			file >>fEbeamCm[i] >>fsigmaForEbeamCm[i];
+			std::cout << "counts: "<<countsEbeamLA++<<"	i: "<<i<<"	Ebeam: "<<fEbeamCm[i]<<"	fsigmaForEbeamCm: " << fsigmaForEbeamCm[i] << std::endl;	
+			
+			//fGraphCrossSection.push_back(TGraph(fEbeamCm[i])); // fill the histogram
+		
+	       
+	} 
+
+    //fGraphCrossSection.push_back(TGraph(fEbeamCm[i],fsigmaForEbeamCm[i]));
+    //fGraphCrossSection.push_back(TGraph(fEbeamCm.size(),&fEbeamCm[0],&fsigmaForEbeamCm[0]));
+
+	file.close();
+
+			TFile testFile("angDist.root", "recreate");
+			testFile.cd();
+	
+				//fGraphCrossSection.SetName("test");
+				//fGraphCrossSection.Write();
+				 fGraphCrossSection.push_back(TGraph(fEbeamCm.size(),&fEbeamCm[0],&fsigmaForEbeamCm[0]));
+				 TGraph* grp = new TGraph(fEbeamCm.size(),&fEbeamCm[0],&fsigmaForEbeamCm[0]);
+				  grp->Draw("AL*");
+				//fGraphsSin->Write();
+				grp->SetMinimum(1.0e-10);// 1.0e-4
+                grp->SetMaximum(1.);// 1000
+				grp->Write("sigmaVsEbeamInCm");
+				testFile.Write();
+				
+}*/
+
+/*void TRexAngularDistribution::CalculateReactionProb(){
+	
+	double tmp_sigma;
+	
+	for(int i = 0; i<nbOfBeamEnergyInCm; i++) {	
+					
+				if(i<fReactionEnergyCM*1000<i+1) {tmp_sigma = fsigmaForEbeamCm[i]*100;std::cout<<" energy is matched to the sigma vs Ebeam histo!!!! --> i: "<<i<<std::endl;
+					if(tmp_sigma<1.0) {
+						//std::cout<<" very low reaction probabiity --> exit the event!!!"<<" i: "<<i<<" sigma: "<<tmp_sigma<<" energy: "<<fReactionEnergyCM<<std::endl;
+						//exit(1);
+						}
+					}
+				}
+	
+}*/
 
 void TRexAngularDistribution::CalculateArealDensity() {
 	if(fTargetMaterial->NumberOfElements() == 1) {

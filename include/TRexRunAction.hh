@@ -30,7 +30,8 @@ class TRexRunAction : public G4UserRunAction {
 		// processed every time a run ends
 		void EndOfRunAction(const G4Run*);
 
-
+		void Write() { fGenerator->Write(); }
+		
 	private:
 		TRexData* fData;
 

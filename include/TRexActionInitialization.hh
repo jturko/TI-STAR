@@ -18,23 +18,23 @@
 
 class TRexActionInitialization : public G4VUserActionInitialization
 {
-    public:
+	public:
 		// constructor accepts arguments which are used for one or more
 		// user action classes
-        TRexActionInitialization(TRexDetectorConstruction*, TRexData* data, MiniBallHistoManager*);
-        ~TRexActionInitialization();
-		
-		// for master thread
-        virtual void BuildForMaster() const;
-        
-        // for worker threads, or single thread in sequential mode
-        virtual void Build() const;
+		TRexActionInitialization(TRexDetectorConstruction*, TRexData* data, MiniBallHistoManager*);
+		~TRexActionInitialization();
 
-    private:
+		// for master thread
+		virtual void BuildForMaster() const;
+
+		// for worker threads, or single thread in sequential mode
+		virtual void Build() const;
+
+	private:
 		// used to be directly used in user action classes, get passed
 		// to constructor so they can still be used
-        TRexDetectorConstruction* fDetConst;
-        TRexData* fData;
+		TRexDetectorConstruction* fDetConst;
+		TRexData* fData;
 		MiniBallHistoManager* fHistoMan;
 };
 

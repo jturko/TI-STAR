@@ -36,6 +36,8 @@ class TRexPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
 		TRexBaseGenerator* GetGenerator() { return fCurrentGenerator; };
 
 		void SetTree(TTree *tree);
+		
+		virtual void Write() {}
 
 	private:
 		void SetGenerator();

@@ -17,38 +17,42 @@
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
 #include "G4IonTable.hh"
+#include "G4UnitsTable.hh"
 
 TRexBeam::TRexBeam() :
 	fGammaTheta(new std::vector<G4double>(0)), fGammaPhi(new std::vector<G4double>(0)), fGammaEnergy(new std::vector<G4double>(0)),
 	fGammaLab(new std::vector<G4LorentzVector>(0)) {
-	// define guns
-	fParticleGunEjectile = new G4ParticleGun(1);
-	fParticleGunRecoil = new G4ParticleGun(1);
-	fParticleGunGamma = new G4ParticleGun(1);
+		// define guns
+		fParticleGunEjectile = new G4ParticleGun(1);
+		fParticleGunRecoil = new G4ParticleGun(1);
+		fParticleGunGamma = new G4ParticleGun(1);
 
-	fBeamEnergy = TRexSettings::Get()->GetBeamEnergy();
-	fBeamWidth = TRexSettings::Get()->GetBeamWidth();
-	fReactionEnergy = 0.;
+		fBeamEnergy = TRexSettings::Get()->GetBeamEnergy();
+		fBeamWidth = TRexSettings::Get()->GetBeamWidth();
+		fReactionEnergy = 0.;
 
-	// define nuclei
-	//DefineNuclei();
+		// define nuclei
+		//DefineNuclei();
 
-	// define reaction kinematics and energy loss calculations
-	//fTargetMaterial = GetTargetMaterial();
-	//std::cout << "TargetMaterialName for energy loss calculation in the target = " << fTargetMaterial->Name() << std::endl;
-	//fKinematics = new Kinematic(&fProjectile, fTargetMaterial, TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2));
+		// define reaction kinematics and energy loss calculations
+		//fTargetMaterial = GetTargetMaterial();
+		//std::cout << "TargetMaterialName for energy loss calculation in the target = " << fTargetMaterial->Name() << std::endl;
+		//fKinematics = new Kinematic(&fProjectile, fTargetMaterial, TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2));
 
-	// energy loss in the targe
-	//fEnergyVsTargetDepth = *(fKinematics->EnergyVsThickness(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
+		// energy loss in the targe
+		//fEnergyVsTargetDepth = *(fKinematics->EnergyVsThickness(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
 
-	//	TFile bla("bla.root", "recreate");
-	//	bla.cd();
-	//	fEnergyVsTargetDepth.Write();
-	//	bla.Close();
+		//	TFile bla("bla.root", "recreate");
+		//	bla.cd();
+		//	fEnergyVsTargetDepth.Write();
+		//	bla.Close();
 
-	// set minimal thetaCM
-	fThetaCM_min = TRexSettings::Get()->GetThetaCmMin();
-}
+		// set minimal thetaCM
+		fThetaCM_min = TRexSettings::Get()->GetThetaCmMin();
+
+		fEbeamCmHist = nullptr;
+		
+	}
 
 TRexBeam::~TRexBeam() {
 	// TODO Auto-generated destructor stub
@@ -57,18 +61,17 @@ TRexBeam::~TRexBeam() {
 void TRexBeam::ShootReactionPosition() {
 	//select random x and y position on a disk with diameter beamWidth
 	/*do {
-		fReactionX = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
-		fReactionY = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
-	} while(sqrt(pow(fReactionX,2)+pow(fReactionY,2)) > fBeamWidth / 2.); original commented out by Leila because X/Y was not a flat distribution (gauss)*/
-	
+	  fReactionX = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
+	  fReactionY = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
+	  } while(sqrt(pow(fReactionX,2)+pow(fReactionY,2)) > fBeamWidth / 2.); original commented out by Leila because X/Y was not a flat distribution (gauss)*/
+
 	fReactionX = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
 	fReactionY = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
 
 	// choose z according to a flat distribution in the target
-	//fReactionZ = CLHEP::RandFlat::shoot(-TRexSettings::Get()->GetTargetThickness() / (2. * TRexSettings::Get()->GetTargetMaterialDensity()) / CLHEP::um,
-	//			     TRexSettings::Get()->GetTargetThickness() / (2. * TRexSettings::Get()->GetTargetMaterialDensity()) / CLHEP::um) * CLHEP::um;
-	//fReactionZ = CLHEP::RandFlat::shoot(-0.5, 0.5) * CLHEP::mm;
 	fReactionZ = CLHEP::RandFlat::shoot(-TRexSettings::Get()->GetTargetPhysicalLength()/(2*CLHEP::um), TRexSettings::Get()->GetTargetPhysicalLength()/(2*CLHEP::um))*CLHEP::um;
+	// units: although the target length is given as cm in the setting file but fReactionZ is in mm!
+	
 }
 
 void TRexBeam::DefineNuclei() {
@@ -98,7 +101,6 @@ void TRexBeam::DefineNuclei() {
 
 	fProjectile = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetProjectileName().c_str()));
 	fTarget = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetTargetName().c_str()));
-	//fTarget = *(IsotopeTable->Search(fTargetZ, fTargetA - fTargetZ));
 	fEjectile = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetEjectileName().c_str()));
 	fRecoil = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetRecoilName().c_str()));
 
@@ -126,7 +128,7 @@ Material* TRexBeam::GetTargetMaterial() {
 	} else {
 		//if target material name is the same as the name of the scattering target build set the material to only this element
 		if(TRexSettings::Get()->GetTargetMaterialName() == TRexSettings::Get()->GetTargetName() || TRexSettings::Get()->GetTargetMaterialName() == "dummy" ||
-				TRexSettings::Get()->GetTargetMaterialName() == "SolidDeuterium") {        
+				TRexSettings::Get()->GetTargetMaterialName() == "SolidDeuterium") {       // added bei Leila 
 			TargetMaterial = new Material((char*)TRexSettings::Get()->GetTargetName().c_str(),false);
 		} else {
 			std::cout<<"'"<<TRexSettings::Get()->GetTargetMaterialName()<<"' != '"<<TRexSettings::Get()->GetTargetName()<<"'"<<std::endl;
@@ -155,14 +157,86 @@ Material* TRexBeam::GetTargetMaterial() {
 	return TargetMaterial;
 }
 
+void TRexBeam::FillCrossSectionGraph() {
+  if(TRexSettings::Get()->GetCrossSectionFile() == "") { std::cout <<"Hello from Leyla & Dennis" <<std::endl;return;}
+
+	std::ifstream file(TRexSettings::Get()->GetCrossSectionFile().c_str());
+
+	if(file.bad()) {
+		std::cerr << "Unable to open cross sectoin file" << TRexSettings::Get()->GetCrossSectionFile() << "!\nexiting ... \n";
+		exit(2);
+	} else {
+		std::cout << "\nReading cross section file " << TRexSettings::Get()->GetCrossSectionFile() << " ... \n"<< std::endl;
+	}
+
+
+	// number of energies = number of lines
+
+	//file.ignore(1000, '\n'); // ignore the first line
+
+	file >> fNbOfBeamEnergyInCm;
+
+	std::cout << "fNbOfBeamEnergyInCm = " << fNbOfBeamEnergyInCm << std::endl;
+
+	// resize the vectors
+	fEbeamCm.resize(fNbOfBeamEnergyInCm);
+	fsigmaForEbeamCm.resize(fNbOfBeamEnergyInCm);
+
+	// loop over all lines
+	for(int i = 0; i<fNbOfBeamEnergyInCm; i++) {				
+		file >>fEbeamCm[i] >>fsigmaForEbeamCm[i];
+		//std::cout << "counts i: "<<i<<"	Ebeam: "<<fEbeamCm[i]<<"	fsigmaForEbeamCm: " << fsigmaForEbeamCm[i] << std::endl;				       
+	} 
+
+	file.close();
+
+	fGraphCrossSection.push_back(TGraph(fEbeamCm.size(),&fEbeamCm[0],&fsigmaForEbeamCm[0]));
+	fGrp = new TGraph(fEbeamCm.size(),&fEbeamCm[0],&fsigmaForEbeamCm[0]);
+	fGrp->Draw("AL*");
+	fGrp->SetMinimum(1.0e-10);
+	//fGrp->SetMaximum(1.);
+	fSigmaVsEbeamCmMax = fGrp->GetMaximum();
+	fNumberOfPointsGraph = fGrp->GetN();
+	fYaxs = fGrp->GetY();
+	int locmax = TMath::LocMax(fNumberOfPointsGraph,fYaxs);
+	fSigmaVsEbeamCmMax = fYaxs[locmax];		
+
+	// *************************** converting the TGraph into a histogram ************************************
+
+	double ebeamCmMin, ebeamCmMax;
+	double sigmaEbeamCmMin, sigmaEbeamCmMax;
+	double sigmaEbeamCm;
+
+	int ebeamCmnbOfBins = fNumberOfPointsGraph*100;
+
+	fGrp->GetPoint(0, ebeamCmMin, sigmaEbeamCmMin);
+	fGrp->GetPoint(fGrp->GetN()-1, ebeamCmMax, sigmaEbeamCmMax);
+
+	double ebeamCmbinWidth = (ebeamCmMax - ebeamCmMin) / ebeamCmnbOfBins;
+
+	// create angular distribution histogram
+	fEbeamCmHist = new TH1F("fEbeamCmHist", "fEbeamCmHist",ebeamCmnbOfBins + 1, ebeamCmMin - (ebeamCmbinWidth/2.), ebeamCmMax + (ebeamCmbinWidth/2.));
+	//std::cout<<"\n ebeam min: " <<ebeamCmMin<<" ebeam max: " <<ebeamCmMax<<" sigma min: " <<sigmaEbeamCmMin<<" sigma max: " <<sigmaEbeamCmMax<<"\n bin width: "<<ebeamCmbinWidth<<" ebeamCmnbOfBins: "<<ebeamCmnbOfBins<<std::endl;
+
+	// loop over all beam energies and fill the histogram
+	for(double energy = ebeamCmMin; energy < ebeamCmMax + ebeamCmbinWidth; energy += ebeamCmbinWidth) {
+		sigmaEbeamCm = fGrp->Eval(energy);
+		fEbeamCmHist->Fill(energy, sigmaEbeamCm);
+	}
+
+	TFile outSigmaEbeamCmFile("sigmaEbeamCm.root", "recreate");
+	outSigmaEbeamCmFile.cd();
+	fGrp->Write();
+	fEbeamCmHist->Write();
+	outSigmaEbeamCmFile.Close();
+}
+
 
 void TRexBeam::CalculateReactionEnergyInTheTarget() {
-	G4double reactionPosInTarget = fReactionZ * TRexSettings::Get()->GetTargetMaterialDensity() + TRexSettings::Get()->GetTargetThickness() / 2.;
 
-	fReactionEnergy = fEnergyVsTargetDepth.Eval(reactionPosInTarget /(CLHEP::mg/CLHEP::cm2))*CLHEP::MeV;
-
-	//std::cout << "fReactionZ = " << fReactionZ << " ,x = " << reactionPosInTarget /(CLHEP::mg/CLHEP::cm2) << " , E(x) = " << fReactionEnergy / CLHEP::MeV << std::endl;
-}
+  G4double reactionPosInTarget = fReactionZ * TRexSettings::Get()->GetTargetMaterialDensity() + TRexSettings::Get()->GetTargetThickness() / 2.;
+  fReactionEnergy = fEnergyVsTargetDepth.Eval(reactionPosInTarget /(CLHEP::mg/CLHEP::cm2))*CLHEP::MeV;
+} 
 
 void TRexBeam::CreateTreeBranches() {
 	if(!fTree) {
@@ -171,6 +245,7 @@ void TRexBeam::CreateTreeBranches() {
 	fTree->Branch("beamEnergy", &fBeamEnergy, "beamEnergy/D");
 	fTree->Branch("beamWidth", &fBeamWidth, "beamWidth/D");
 	fTree->Branch("reactionEnergy", &fReactionEnergy, "reactionEnergy/D");
+	fTree->Branch("reactionEnergyCM", &fReactionEnergyCM, "reactionEnergyCM/D");
 	fTree->Branch("reactionX", &fReactionX, "reactionX/D");
 	fTree->Branch("reactionY", &fReactionY, "reactionY/D");
 	fTree->Branch("reactionZ", &fReactionZ, "reactionZ/D");

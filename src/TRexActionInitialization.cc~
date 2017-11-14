@@ -17,7 +17,6 @@
 #include "TRexEventAction.hh"
 #include "TRexStackingAction.hh"
 #include "HadronicStackingAction.hh"
-#include "MySteppingAction.hh"
 
 TRexActionInitialization::TRexActionInitialization(TRexDetectorConstruction* detConst, TRexData* data, MiniBallHistoManager* histoMan) : G4VUserActionInitialization(), fDetConst(detConst), fData(data), fHistoMan(histoMan)
 {
@@ -29,7 +28,7 @@ TRexActionInitialization::~TRexActionInitialization(){
 }
 
 // worker threads and single threaded
-void TRexActionInitialization::Build() const {
+void TRexActionInitialization::Build() const{
     TRexPrimaryGeneratorAction* gen_action = new TRexPrimaryGeneratorAction();
     SetUserAction(gen_action);
 
@@ -44,9 +43,6 @@ void TRexActionInitialization::Build() const {
 
     HadronicStackingAction* myAction = new HadronicStackingAction();
     SetUserAction(myAction);
-    
-    MySteppingAction* mystep_action = new MySteppingAction();
-    SetUserAction(mystep_action);
 }
 
 //master thread in multithreaded run

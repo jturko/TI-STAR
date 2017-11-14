@@ -40,6 +40,7 @@ class TRexAngularDistribution : public TRexBeam, public MiniBallSource {
 		void CalculateArealDensity();
 		void CalculateCrossSectionIntegral();
 		void CalculateScatteringProbability();
+		//void CalculateReactionProb();//Leila
 
 		void ReadLevelFile();
 		void FillMiniballLevels();
@@ -49,6 +50,7 @@ class TRexAngularDistribution : public TRexBeam, public MiniBallSource {
 		void ShootThetaCm(int levelNb);
 		void ShootReactionTypeAndExcitationEnergy();
 		//void ShootReactionPosition();
+		//void FillCrossSectionGraph(); // Leila
 
 
 		size_t fNbOfLevels;
@@ -71,12 +73,14 @@ class TRexAngularDistribution : public TRexBeam, public MiniBallSource {
 		//std::vector<TGraph> fGraphs;
 		std::vector<TGraph> fGraphsSin;
 		std::vector<TH1F> fHistos;
+		//std::vector<TGraph> fGraphCrossSection;
 
 		std::vector<G4double> fArealDensity;
 		std::vector<G4double> fCrossSectionIntegral;
 		std::vector<G4double> fScatteringProbabilitySingle;
 		
 		G4bool isDefined = false;
+		
 };
 
 #endif /* TREXANGULARDISTRIBUTION_HH_ */

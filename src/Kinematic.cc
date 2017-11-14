@@ -916,8 +916,9 @@ TSpline3* Kinematic::RangeVsEnergy(double maximum_energy, double step_size) {
 		energy[i] = en;
 		range[i] = CompoundRange(fProjectile, fTarget, en, -7);
 #ifdef debug_irma
-		if(write_file > 0)
+		//if(write_file > 0) ....
 			tmp<<energy[i]<<" "<<range[i]<<std::endl;
+			//std::cout<<energy[i]<<"<-- energy and range --> "<<range[i]<<" i: "<<i<<std::endl;
 #endif
 	}
 
@@ -1002,7 +1003,7 @@ TSpline3* Kinematic::EnergyVsRange(double maximum_energy, double step_size) {
 
 TSpline3* Kinematic::EnergyVsThickness(double beam_energy, double step_size) {
 #ifdef debug_VsX
-	std::cout<<"Kinematic::EnergyVsThickness: "<<beam_energy<<", "<<step_size<<std::endl;
+	std::cout<<"\n\n\n\n Kinematic::EnergyVsThickness: "<<beam_energy<<", "<<step_size<<" target thickness: "<<fTargetThickness<<std::endl;
 #endif
 
 	//  if(!(fTargetThickness > 0) && !(fTargetThickness < 0))
@@ -1035,7 +1036,7 @@ TSpline3* Kinematic::EnergyVsThickness(double beam_energy, double step_size) {
 		thickness[i] = thick;
 		energy[i] = EnergyLoss(fProjectile, fTarget, thick, beam_energy, -4);
 #ifdef debug_VsX
-		std::cout<<i<<": "<<thick<<" -> "<<energy[i]<<std::endl;
+		std::cout<<"\n\n\n\n i: "<<i<<" thick: "<<thick<<" -> energy: "<<energy[i]<<" thikness/density: "<<thick/fTargetThickness<<std::endl;
 #endif
 	}
 

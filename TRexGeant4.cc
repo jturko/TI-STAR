@@ -88,7 +88,8 @@ int main(int argc,char** argv) {
   G4VUserPhysicsList* physics = new myQGSP_BIC();
   runManager->SetUserInitialization(physics);
 
-  runManager->SetUserInitialization(new TRexActionInitialization((TRexDetectorConstruction*)detector, &data, miniballHistoManager));
+  TRexActionInitialization* action = new TRexActionInitialization((TRexDetectorConstruction*)detector, &data, miniballHistoManager);
+  runManager->SetUserInitialization(action);
 
   runManager->Initialize();
 
@@ -112,6 +113,7 @@ int main(int argc,char** argv) {
   //                 owned and deleted by the run manager, so they should not
   //                 be deleted in the main() program !
   //
+
 #ifdef G4VIS_USE
   delete visManager;
 #endif
