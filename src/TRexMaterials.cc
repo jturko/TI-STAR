@@ -132,6 +132,7 @@ TRexMaterials::TRexMaterials() {
 
 	G4Material* helium = fManager->FindOrBuildMaterial("G4_He");
 	helium->SetName("helium");
+	//G4cout << *(G4Material::GetMaterialTable());// to get the material table Leila
 
 	G4Material* argon = fManager->FindOrBuildMaterial("G4_Ar");
 	argon->SetName("argon");
@@ -706,9 +707,18 @@ G4Material* TRexMaterials::BuildDeuterium() {
 	G4Material* deuteriumGas = new G4Material("2H", 0.180 * CLHEP::kg/CLHEP::m3, 1,
 			kStateGas, 273 * CLHEP::kelvin, 1. * CLHEP::atmosphere);//10.0e-3. * CLHEP::atmosphere, 298 * CLHEP::kelvin
 
-	deuteriumGas->AddElement(fElD,2);
+	deuteriumGas->AddElement(fElD,4);
 
 	return deuteriumGas;
+}
+
+G4Material* TRexMaterials::BuildHelium() {
+	G4Material* heliumGas = new G4Material("4He", 0.179 * CLHEP::kg/CLHEP::m3, 1,
+			kStateGas, 273 * CLHEP::kelvin, 1. * CLHEP::atmosphere);// added by Leila He gas density is 0.179 kg/m3 or 0.179e-3 g/cm3 at stp (1 bar & 0 deg or 273 K). 0.166 @ 293K Leila!
+
+	heliumGas->AddElement(fElHe,4);
+
+	return heliumGas;// does not work??????
 }
 
 G4Material* TRexMaterials::BuildDeuteratedPE() {
@@ -764,6 +774,7 @@ G4Material* TRexMaterials::GetMaterial(std::string name) {//, double pressure) {
 	}
 
 	std::cout<<"got material "<<material->GetName()<<" from "<<name<<std::endl;
+	
 
 	return material;
 }

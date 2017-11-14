@@ -30,6 +30,9 @@
 
 #include "TFile.h"
 #include "TSpline.h"
+#include "TRandom.h"
+#include "TRandom1.h"
+#include "TH1F.h"
 
 class G4ParticleGun;
 
@@ -43,7 +46,7 @@ class TRexBeam : public TRexBaseGenerator {
 		//void CreateTreeBranches(TTree &tree);
 		//void FillTree(TTree &tree);
 		void CreateTreeBranches();
-
+		
 	protected:
 		// shoot fReactionX, fReactionY, fReactionZ of the source
 		void ShootReactionPosition();
@@ -53,6 +56,7 @@ class TRexBeam : public TRexBaseGenerator {
 
 		// to calculate energy loss of the beam in the target
 		Material* GetTargetMaterial();
+		void FillCrossSectionGraph(); // Leila
 		void CalculateReactionEnergyInTheTarget();
 
 		// define particle type
@@ -90,10 +94,12 @@ class TRexBeam : public TRexBaseGenerator {
 		Element fEjectile;
 		Element fRecoil;
 		TSpline3 fEnergyVsTargetDepth;
+		TSpline3 fRangeVsBeamEnergyLeila;
 
 		G4double fBeamEnergy;
 		G4double fBeamWidth;
 		G4double fReactionEnergy;
+		G4double fReactionEnergyCM;
 		G4double fReactionX;
 		G4double fReactionY;
 		G4double fReactionZ;
@@ -116,6 +122,18 @@ class TRexBeam : public TRexBaseGenerator {
 		G4LorentzVector fRecoilLab;
 		G4LorentzVector fEjectileLabAfterTarget;
 		std::vector<G4LorentzVector> *fGammaLab;
+		
+		int fNbOfBeamEnergyInCm; // Leila
+		std::vector<double> fEbeamCm; // Leila
+		std::vector<double> fsigmaForEbeamCm; // Leila
+		std::vector<TGraph> fGraphCrossSection;// Leila 
+		G4double fSigmaVsEbeamCmMax;//Leila
+		TGraph* fGrp;
+		TH1F* fEbeamCmHist;
+		int fNumberOfPointsGraph;
+		double* fYaxs;
+		TRandom fRndReaction;
+		int fEventCounter;
 };
 
 #endif /* TREXBEAMSOURCE_HH_ */

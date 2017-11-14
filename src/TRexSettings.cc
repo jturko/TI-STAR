@@ -49,6 +49,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	fVacuumChamberType = sett.GetValue("VacuumChamberType", "cylinder");
 	fVacuumChamberGas = sett.GetValue("VacuumChamberGas", "helium");
 	//fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", 1e-6) /1000. * CLHEP::bar; // original
+	//fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", 0.) /1000. * CLHEP::bar; // no gas pressure in the chamber
 	fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", sett.GetValue("TargetPressure", 0.0) /1000.) * CLHEP::bar;
 
 	fTestSourceEnergy = sett.GetValue("TestSourceEnergy", 5000.0) * CLHEP::keV;
@@ -87,6 +88,11 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	if(fAngularDistributionFile.find("AngularDistributionFiles/") == 0) {
 		fAngularDistributionFile.insert(0, "/");
 		fAngularDistributionFile.insert(0, simDir);
+	}
+	fCrossSectionFile = sett.GetValue("CrossSectionFile", "");
+	if(fCrossSectionFile.find("AngularDistributionFiles/") == 0) {
+		fCrossSectionFile.insert(0, "/");
+		fCrossSectionFile.insert(0, simDir);
 	}
 	fMassFile = sett.GetValue("MassFile", "MassFile.dat");
 	if(fMassFile.find("MassFile.dat") == 0) {

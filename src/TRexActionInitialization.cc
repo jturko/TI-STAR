@@ -29,7 +29,7 @@ TRexActionInitialization::~TRexActionInitialization(){
 }
 
 // worker threads and single threaded
-void TRexActionInitialization::Build() const{
+void TRexActionInitialization::Build() const {
     TRexPrimaryGeneratorAction* gen_action = new TRexPrimaryGeneratorAction();
     SetUserAction(gen_action);
 

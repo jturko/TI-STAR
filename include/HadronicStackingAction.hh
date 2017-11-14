@@ -20,6 +20,7 @@ class HadronicStackingAction : public G4UserStackingAction{
          G4ParticleDefinition * deuteronDef;
          G4ParticleDefinition * protonDef;
          G4ParticleDefinition * electronDef;
+         G4ParticleDefinition * alphaDef;
          std::ofstream outfile;
 };
 

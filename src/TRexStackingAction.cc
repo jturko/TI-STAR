@@ -9,8 +9,6 @@ TRexStackingAction::TRexStackingAction(){
 	particleTable = G4ParticleTable::GetParticleTable();
 	
 	electronDef = nullptr;
-	
-	//out.open("electrons.dat", std::ios::app | std::ios::out);
 }
 
 TRexStackingAction::~TRexStackingAction()
