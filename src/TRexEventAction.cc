@@ -14,6 +14,8 @@
 #include "G4Trajectory.hh"
 #include "G4ios.hh"
 
+#include "TMath.h"
+
 
 TRexEventAction::TRexEventAction(TRexDetectorConstruction* detectorConst, MiniBallHistoManager* miniballHistoManager) :
   fDetectorConst(detectorConst),
@@ -38,6 +40,7 @@ TRexEventAction::~TRexEventAction() {
 void TRexEventAction::BeginOfEventAction(const G4Event*) {
 	if(TRexSettings::Get()->SimulateGammas()) {
 		// clear old event
+		gamTotalE = 0.;
 		for(unsigned int i = 0; i < fMiniball->size(); i++) {
 			(*fMiniball)[i].ClearGermanium();
 		}
@@ -115,8 +118,8 @@ void TRexEventAction::MiniballEndOfEventAction(const G4Event* evt) {
 				// energy deposited in the detector
 				G4double Edep = (*HPGeHC)[hit_nb]->GetEdep();
 
-				// if(Edep > 2000*CLHEP::keV) {
-				// 	cout << "Edep = " << Edep / CLHEP::keV << " , nbOfHits in detector " << id << " (clu = " << id / 3 << " , cry = " << id % 3 << ") : " << HPGeHC->entries() << endl;
+				// if(Edep > 2000*keV) {
+				// 	cout << "Edep = " << Edep / keV << " , nbOfHits in detector " << id << " (clu = " << id / 3 << " , cry = " << id % 3 << ") : " << HPGeHC->entries() << endl;
 				// }
 
 				if(Edep > 0) {
@@ -125,11 +128,12 @@ void TRexEventAction::MiniballEndOfEventAction(const G4Event* evt) {
 					//position in world
 					G4ThreeVector positionIW = (*HPGeHC)[hit_nb]->GetPos();
 					G4int trace_id = (*HPGeHC)[hit_nb]->GetTraceID();
+					G4double time = (*HPGeHC)[hit_nb]->GetTime();
 
 					size_t det_id = (*HPGeHC)[hit_nb]->GetDetectorID();
 					size_t seg_id = (*HPGeHC)[hit_nb]->GetSegmentID();
 
-					fMbHistoMan->SetMBInteraction(det_id, seg_id, Edep, event_id, trace_id, positionID, positionIW);
+					fMbHistoMan->SetMBInteraction(det_id, seg_id, Edep, event_id, trace_id, positionID, positionIW, time);
 
 					//if(data->MiniballEndOfEventAction) {
 					//MiniBallEventAction::EndOfEventAction(evt);
@@ -189,14 +193,25 @@ void TRexEventAction::CollectMiniballData() {
 			// check if crystal was hit
 			if((*detectors)[det]->CoreEnAccu > 0) {
 				Cluster.SetCore(cry, (*detectors)[det]->CoreEnAccu/CLHEP::keV, time);
-
-				//cout << "coreE = " << (*detectors)[det]->CoreEnAccu/CLHEP::keV << endl;
+				double TRX, TRY, TRZ;
+				time = (*detectors)[det]->time;
+				TRX = (*detectors)[det]->TRInteractionPosition[0];
+				TRY = (*detectors)[det]->TRInteractionPosition[1];
+				TRZ = (*detectors)[det]->TRInteractionPosition[2];
+				//Cluster.SetnoComptE(gamTotalE/CLHEP::keV);
+				
+				double thetaIn = TMath::ACos(TRZ/TMath::Sqrt(TRX*TRX + TRY*TRY + TRZ*TRZ));
+				Cluster.SetTheta(thetaIn);
+				Cluster.SetPosition(TRX, TRY, TRZ);
+				//std::cout << "TRTHETA = " <<TRTheta << std::endl;
+				
+				//cout << "coreE = " << (*detectors)[det]->CoreEnAccu/keV << endl;
 
 				// loop over all segments
 				for(int seg = 0; seg < NB_OF_SEGMENTS; seg++) {
 					// check if segment was hit
 					if((*detectors)[det]->SegmentEnAccu[seg] > 0) {
-						//cout << "segE = " << (*detectors)[det]->SegmentEn[seg]/CLHEP::keV << endl;
+						//cout << "segE = " << (*detectors)[det]->SegmentEn[seg]/keV << endl;
 						Cluster.SetSegment(cry, seg, (*detectors)[det]->SegmentEnAccu[seg]/CLHEP::keV,time);
 					}
 				}

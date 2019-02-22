@@ -6,7 +6,7 @@
  * 
  * modified to use custom QGSP_BIC physics list, which includes
  * nuclear recoils on GenericIon class.
- * dhymers 2017/06/12
+ * dhymers 2017/06/12 and than by Leyla 2018/06/12
  */
 
 //#ifdef G4MULTITHREADED
@@ -31,7 +31,7 @@
 
 #include "TRexDetectorConstruction.hh"
 //#include "TRexPhysicsList.hh"
-//#include "PhysicsList.hh"
+#include "PhysicsList.hh"
 
 #include "my_QGSP_BIC.hh"
 
@@ -48,6 +48,10 @@
 #include "TRexActionInitialization.hh"
 
 #include "Randomize.hh"
+
+#include "G4RadioactiveDecayPhysics.hh"
+
+static __thread int foo;
 
 int main(int argc,char** argv) {
   // class to organize command line

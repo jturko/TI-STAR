@@ -25,7 +25,7 @@ TRexBarrelErestSingle::TRexBarrelErestSingle(std::string name, std::string direc
 
 		fDeadLayer = TRexSettings::Get()->GetFBarrelErestSingleDeadLayer();
 
-		fPos = G4ThreeVector(TRexSettings::Get()->GetFBarrelErestSingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad),
+		fPos = G4ThreeVector(TRexSettings::Get()->GetFBarrelErestSingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad) + 13.0 * CLHEP::mm,// - 13.0
 									TRexSettings::Get()->GetFBarrelErestSingleDistanceToBeam()[fId] * sin(fStartAngleDetector / CLHEP::rad),
 									TRexSettings::Get()->GetFBarrelErestSinglePosZ()[fId]);
 	} else if(fDirection == "middle") {
@@ -67,9 +67,9 @@ void TRexBarrelErestSingle::Construct(G4LogicalVolume* experimentalHall_log, G4S
 	ConstructSilicon(experimentalHall_log, SDMan);
 
 	// PCB
-	if(TRexSettings::Get()->ConstructPCB()) {
+	/**if(TRexSettings::Get()->ConstructPCB()) { ##############333
 		ConstructPCB(experimentalHall_log);
-	}
+	}**/
 
 	// include dead layers ?
 	if(fDeadLayer > 0.1*CLHEP::um) {
@@ -179,7 +179,7 @@ void TRexBarrelErestSingle::ConstructDeadLayer(G4LogicalVolume* experimentalHall
 	G4LogicalVolume* deadLayer_log = new G4LogicalVolume(deadLayer_solid, detectorMaterial, fName + "_deadLayer_log");
 
 	//G4VPhysicalVolume* phys_vol =
-	new G4PVPlacement(G4Transform3D(*fRotMatrix, fPos), deadLayer_log, "deadLayerBarrelErest", experimentalHall_log, false, 0);
+	new G4PVPlacement(G4Transform3D(*fRotMatrix, fPos), deadLayer_log, "deadLayerBarrelErest", experimentalHall_log, false, 0); 
 
 	if(TRexSettings::Get()->Colours()) {
 		fLogicalVolume->SetVisAttributes(TRexColour::Get()->yellow);

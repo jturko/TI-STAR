@@ -11,8 +11,10 @@
 #include "TRexColour.hh"
 #include "TRexVacuumChamberCylinder.hh"
 #include "TRexVacuumChamberSphere.hh"
+#include "TRexVacuumChamberBox.hh"
 #include "TRexVacuumChamberGasCylinder.hh"
 #include "TRexVacuumChamberGasSphere.hh"
+#include "TRexVacuumChamberGasBox.hh"
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
@@ -78,7 +80,7 @@ void TRexDetectorConstruction::ConstructTarget() {
 	
 	G4Material* targetEntranceFoilMaterial = TRexMaterials::Get()->GetMaterial("beryllium");
 	
-	G4double targetEntranceFoilHalfThickness = 4.0*CLHEP::um;
+	G4double targetEntranceFoilHalfThickness = 4.0*CLHEP::um;// total thickness is 8 um
 	 
 	G4Tubs* targetEntranceFoil_tube = new G4Tubs("targetEntranceFoil",
 			innerRadius, outerRadius,
@@ -89,9 +91,10 @@ void TRexDetectorConstruction::ConstructTarget() {
 	
 	//G4UnionSolid* beFoil_target = new G4UnionSolid("beFoil_target", targetEntranceFoil_tube,target_tube);
 	
-	new G4PVPlacement(0, G4ThreeVector(0,0,-80.0040*CLHEP::mm), targetEntranceFoil_log, "target_beFoil",fVacuumChamberGas_log,false,0);
+	new G4PVPlacement(0, G4ThreeVector(0,0,-(TRexSettings::Get()->GetTargetPhysicalLength()/2 + targetEntranceFoilHalfThickness)*CLHEP::mm), targetEntranceFoil_log, "target_beFoil",fVacuumChamberGas_log,false,0);
+	new G4PVPlacement(0, G4ThreeVector(0,0,(TRexSettings::Get()->GetTargetPhysicalLength()/2 + targetEntranceFoilHalfThickness)*CLHEP::mm), targetEntranceFoil_log, "target_beFoil",fVacuumChamberGas_log,false,0);
 	
-	if(TRexSettings::Get()->Colours()) {targetEntranceFoil_log->SetVisAttributes(TRexColour::Get()->red);}
+	if(TRexSettings::Get()->Colours()) {targetEntranceFoil_log->SetVisAttributes(TRexColour::Get()->cyan);}
 				
 	// ################### Target Entrance Foil added by Leila  end  ###################
 	
@@ -118,6 +121,27 @@ void TRexDetectorConstruction::ConstructTarget() {
 	if(TRexSettings::Get()->Colours()) {targetMantelFoil_log->SetVisAttributes(TRexColour::Get()->magenta);}
 	
 	// ################### Target Mantel (Foil) added by Leila  end  ###################
+	
+	// ################### Al shielding added by Leila  start  ###################
+	
+	/***G4Material* shieldMaterial = TRexMaterials::Get()->GetMaterial("aluminium");
+	
+	G4double shieldHalfLengthX = 7.5* CLHEP::mm;
+	G4double shieldHalfLengthY = 1.0* CLHEP::mm;
+	G4double shieldHalfLengthZ = 4.0* CLHEP::mm;
+	
+	G4Box* shiled = new G4Box("Shielding", shieldHalfLengthX, shieldHalfLengthY, shieldHalfLengthZ);
+	
+	G4LogicalVolume* shield_log = new G4LogicalVolume(shiled,shieldMaterial,"shield_log", 0, 0, 0);
+	
+	new G4PVPlacement(0, G4ThreeVector(0.0*CLHEP::mm,7.5*CLHEP::mm,-TRexSettings::Get()->GetTargetPhysicalLength()/2*CLHEP::mm + shieldHalfLengthZ), shield_log, "Shielding",fVacuumChamberGas_log,false,0);
+	new G4PVPlacement(0, G4ThreeVector(0.0*CLHEP::mm,7.5*CLHEP::mm,TRexSettings::Get()->GetTargetPhysicalLength()/2*CLHEP::mm - shieldHalfLengthZ), shield_log, "Shielding",fVacuumChamberGas_log,false,0);
+	new G4PVPlacement(0, G4ThreeVector(0.0*CLHEP::mm,-7.5*CLHEP::mm,-TRexSettings::Get()->GetTargetPhysicalLength()/2*CLHEP::mm + shieldHalfLengthZ), shield_log, "Shielding",fVacuumChamberGas_log,false,0);
+	new G4PVPlacement(0, G4ThreeVector(0.0*CLHEP::mm,-7.5*CLHEP::mm,TRexSettings::Get()->GetTargetPhysicalLength()/2*CLHEP::mm - shieldHalfLengthZ), shield_log, "Shielding",fVacuumChamberGas_log,false,0);
+	
+	if(TRexSettings::Get()->Colours()) {shield_log->SetVisAttributes(TRexColour::Get()->green);}***/
+		
+	// ################### Al shielding added by Leila  end  ###################
 
 	G4Tubs* target_tube = new G4Tubs("detector",
 			innerRadius, outerRadius,
@@ -138,8 +162,9 @@ void TRexDetectorConstruction::ConstructTarget() {
 		TRexSettings::Get()->SetTargetThickness(target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2)));
 		TRexSettings::Get()->SetTargetMaterialDensity(target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2)*2.*halfThickness));
 		std::cout<<"Built gas target with pressure "<<targetMaterial->GetPressure()/CLHEP::bar*1000.<<" mbar, and "<<2.*halfThickness/CLHEP::cm<<" cm length => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(CLHEP::mg/CLHEP::cm2)<<" mg/cm2"<<" target mass from file: "<<target_log->GetMass()<<std::endl;
+		
 	} else {
-	  std::cout<<"Built solid target with thickness "<<2.*halfThickness/CLHEP::um<<" um => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(CLHEP::mg/CLHEP::cm2)<<" mg/cm2 and density "<<TRexSettings::Get()->GetTargetMaterialDensity()/(CLHEP::g/CLHEP::cm3)<<" g/cm3"<<std::endl;
+		std::cout<<"Built solid target with thickness "<<2.*halfThickness/um<<" um => area density = "<<target_log->GetMass()/(TMath::Pi()*TMath::Power(outerRadius,2))/(CLHEP::mg/CLHEP::cm2)<<" mg/cm2 and density "<<TRexSettings::Get()->GetTargetMaterialDensity()/(CLHEP::g/CLHEP::cm3)<<" g/cm3"<<std::endl;
 	}		
 	
 }
@@ -164,6 +189,9 @@ void TRexDetectorConstruction::ConstructVacuumChamber() {
 	} else if(TRexSettings::Get()->GetVacuumChamberType() == "sphere") {
 		std::cout << "Constructing vacuum chamber gas with type " << TRexSettings::Get()->GetVacuumChamberType() << " ....\n" << std::endl;
 		fVacuumChamberGas = new TRexVacuumChamberGasSphere();
+	} else if(TRexSettings::Get()->GetVacuumChamberType() == "box") {
+		std::cout << "Constructing vacuum chamber gas with type " << TRexSettings::Get()->GetVacuumChamberType() << " ....\n" << std::endl;
+		fVacuumChamberGas = new TRexVacuumChamberGasBox();
 	} else {
 		std::cerr << "Vacuum chamber with type " << TRexSettings::Get()->GetVacuumChamberType() << " not implemented yet !" << std::endl;
 		exit(1);

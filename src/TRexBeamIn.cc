@@ -66,7 +66,7 @@ void TRexBeamIn::GeneratePrimaries(G4Event *anEvent) {
 void TRexBeamIn::ShootReactionPosition() {
 	G4double BeamDiameter = TRexSettings::Get()->GetBeamWidth() / mm;
 	fReactionZ = TRexSettings::Get()->GetGasTargetLength() / cm ;
-	fReactionZ = -(fReactionZ/2.) - 0.;
+	fReactionZ = -(fReactionZ/2.) - 0.0008;
 	fReactionZ *= cm;
 	
 	//hard-code start position

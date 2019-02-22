@@ -50,7 +50,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	fVacuumChamberGas = sett.GetValue("VacuumChamberGas", "helium");
 	//fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", 1e-6) /1000. * CLHEP::bar; // original
 	//fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", 0.) /1000. * CLHEP::bar; // no gas pressure in the chamber
-	fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", sett.GetValue("TargetPressure", 0.0) /1000.) * CLHEP::bar;
+	fVacuumChamberGasPressure = sett.GetValue("VacuumChamberGasPressure", sett.GetValue("TargetPressure", 1000.0) /1000.) * CLHEP::bar;
 
 	fTestSourceEnergy = sett.GetValue("TestSourceEnergy", 5000.0) * CLHEP::keV;
 
@@ -61,7 +61,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	//fThetaCmMin = sett.GetValue("ThetaCmMin", 2.0) * CLHEP::degree; // commented out by Leila 27.07.2017
 	fThetaCmMin = sett.GetValue("ThetaCmMin", 2.0) * CLHEP::degree;  // added by Leila 27.07.2017
 	
-	///G4cout<<"Leilaaaaaaaaaaaaaaaaaaaaaaaaaaa RexSettings: fThetaCmMin "<<fThetaCmMin<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%555"<<G4endl;
+	//G4cout<<"Leilaaaaaaaaaaaaaaaaaaaaaaaaaaa RexSettings: fThetaCmMin "<<fThetaCmMin<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%555"<<G4endl;
 	//G4cout<<"Leilaaaaaaaaaaaaaaaaaaaaaaaaaaa RexSettings: vacuumChamberGasPressure "<<fVacuumChamberGasPressure/CLHEP::bar <<" %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%555"<<G4endl;
 
 	//reaction
@@ -89,7 +89,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 		fAngularDistributionFile.insert(0, "/");
 		fAngularDistributionFile.insert(0, simDir);
 	}
-	fCrossSectionFile = sett.GetValue("CrossSectionFile", "");
+	fCrossSectionFile = sett.GetValue("CrossSectionFile", "dummy.dat");
 	if(fCrossSectionFile.find("AngularDistributionFiles/") == 0) {
 		fCrossSectionFile.insert(0, "/");
 		fCrossSectionFile.insert(0, simDir);
@@ -100,8 +100,8 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 		fMassFile.insert(0, simDir);
 	}
 
-	fAlphaSourceDiameter = sett.GetValue("AlphaSourceDiameter", 3) * CLHEP::mm;
-	fAlphaSourceThickness = sett.GetValue("AlphaSourceThickness", 3) * CLHEP::mm;
+	fAlphaSourceDiameter = sett.GetValue("AlphaSourceDiameter", 3.) * CLHEP::mm; // original 3 mm //last value: 2
+	fAlphaSourceThickness = sett.GetValue("AlphaSourceThickness",3.) * CLHEP::mm;// original 3 mm //last value 40 
 
 	fTargetDiameter = sett.GetValue("TargetDiameter", 3) * CLHEP::mm;
 	fTargetThickness = sett.GetValue("TargetThickness", 0.5) * CLHEP::mg/cm2;
@@ -198,7 +198,8 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	fBCDErestSingleEnergyResolution = sett.GetValue("BCDErestSinglesEnergyResolution", 20) * CLHEP::keV;
 
 
-	// FBarrel deltaE
+	// ****************************************************** FBarrel deltaE ******************************************************
+	
 	fUseFBarrelDeltaE = sett.GetValue("UseFBarrelDeltaE", 0);
 	fNbOfFBarrelDeltaESingles = sett.GetValue("NbOfFBarrelDeltaESingles", 4);
 	for(int i = 0; i < fNbOfFBarrelDeltaESingles; i++){
@@ -216,10 +217,11 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	//fFBarrelDeltaESingleStripWidth = sett.GetValue("FBarrelDeltaESinglesStripWidth", 3.125) * CLHEP::mm;
 	fFBarrelDeltaESingleStripWidthPar = sett.GetValue("FBarrelDeltaESinglesStripWidthPar", 3.125) * CLHEP::mm; // added bei Leila
 	fFBarrelDeltaESingleStripWidthPer = sett.GetValue("FBarrelDeltaESinglesStripWidthPer", 3.125) * CLHEP::mm; // added bei Leila
-	fFBarrelDeltaESingleEnergyResolution = sett.GetValue("FBarrelDeltaESinglesEnergyResolution", 50) * CLHEP::keV;
+	fFBarrelDeltaESingleEnergyResolution = sett.GetValue("FBarrelDeltaESinglesEnergyResolution", 0.) * CLHEP::keV; // original 50 keV
 	fFBarrelDeltaESingleFoilThickness = sett.GetValue("FBarrelDeltaESinglesFoilThickness", -1.) * CLHEP::um;
 
-	// FBarrel Erest
+	// ****************************************************** FBarrel Erest ******************************************************
+	
 	fUseFBarrelErest = sett.GetValue("UseFBarrelErest", 0);
 	fNbOfFBarrelErestSingles = sett.GetValue("NbOfFBarrelErestSingles", 4);
 	for(int i = 0; i < fNbOfFBarrelErestSingles; i++){
@@ -234,9 +236,10 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	fFBarrelErestSingleDeadLayer = sett.GetValue("FBarrelErestSingles.DeadLayer", 0.0) * CLHEP::um;
 	fFBarrelErestSingleLengthX = sett.GetValue("FBarrelErestSinglesLength.X", 50.0) * CLHEP::mm;
 	fFBarrelErestSingleLengthY = sett.GetValue("FBarrelErestSinglesLength.Y", 50.0) * CLHEP::mm;
-	fFBarrelErestSingleEnergyResolution = sett.GetValue("FBarrelErestSinglesEnergyResolution", 50) * CLHEP::keV;
+	fFBarrelErestSingleEnergyResolution = sett.GetValue("FBarrelErestSinglesEnergyResolution", 0.) * CLHEP::keV; // original 50 keV
 
-	// Second FBarrel deltaE
+	// ****************************************************** Second FBarrel deltaE ******************************************************
+	
 	fUseSecondFBarrelDeltaE = sett.GetValue("UseSecondFBarrelDeltaE", 0);
 	fNbOfSecondFBarrelDeltaESingles = sett.GetValue("NbOfSecondFBarrelDeltaESingles", 4);
 	for(int i = 0; i < fNbOfSecondFBarrelDeltaESingles; i++){
@@ -252,7 +255,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	//fSecondFBarrelDeltaESingleStripWidth = sett.GetValue("SecondFBarrelDeltaESinglesStripWidth", 3.125) * CLHEP::mm;
 	fSecondFBarrelDeltaESingleStripWidthPar = sett.GetValue("SecondFBarrelDeltaESinglesStripWidthPar", 3.125) * CLHEP::mm; // added  bei Leila
 	fSecondFBarrelDeltaESingleStripWidthPer = sett.GetValue("SecondFBarrelDeltaESinglesStripWidthPer", 3.125) * CLHEP::mm; // added bei Leila
-	fSecondFBarrelDeltaESingleEnergyResolution = sett.GetValue("SecondFBarrelDeltaESinglesEnergyResolution", 50) * CLHEP::keV;
+	fSecondFBarrelDeltaESingleEnergyResolution = sett.GetValue("SecondFBarrelDeltaESinglesEnergyResolution", 0.) * CLHEP::keV; // original 50 keV
 	fSecondFBarrelDeltaESingleFoilThickness = sett.GetValue("SecondFBarrelDeltaESinglesFoilThickness", -1.) * CLHEP::um;
 
 	// MBarrel deltaE
@@ -289,8 +292,8 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	fMBarrelErestSingleLengthY = sett.GetValue("MBarrelErestSinglesLength.Y", 50.0) * CLHEP::mm;
 	fMBarrelErestSingleEnergyResolution = sett.GetValue("MBarrelErestSinglesEnergyResolution", 50) * CLHEP::keV;
 
-
-	// BBarrel deltaE
+	// ****************************************************** BBarrel deltaE ******************************************************
+	
 	fUseBBarrelDeltaE = sett.GetValue("UseBBarrelDeltaE", 0);
 	fNbOfBBarrelDeltaESingles = sett.GetValue("NbOfBBarrelDeltaESingles", 4);
 	for(int i = 0; i < fNbOfBBarrelDeltaESingles; i++){
@@ -308,10 +311,11 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	//fBBarrelDeltaESingleStripWidth = sett.GetValue("BBarrelDeltaESinglesStripWidth", 3.125) * CLHEP::mm;
 	fBBarrelDeltaESingleStripWidthPar = sett.GetValue("BBarrelDeltaESinglesStripWidthPar", 3.125) * CLHEP::mm; // added bei Leila
 	fBBarrelDeltaESingleStripWidthPer = sett.GetValue("BBarrelDeltaESinglesStripWidthPer", 3.125) * CLHEP::mm; // added bei Leila
-	fBBarrelDeltaESingleEnergyResolution = sett.GetValue("BBarrelDeltaESinglesEnergyResolution", 50) * CLHEP::keV;
+	fBBarrelDeltaESingleEnergyResolution = sett.GetValue("BBarrelDeltaESinglesEnergyResolution", 0.) * CLHEP::keV; // original 50 keV
 	fBBarrelDeltaESingleFoilThickness = sett.GetValue("BBarrelDeltaESinglesFoilThickness", -1.) * CLHEP::um;
 
-	// BBarrel Erest
+	// ****************************************************** BBarrel Erest ******************************************************
+	
 	fUseBBarrelErest = sett.GetValue("UseBBarrelErest", 0);
 	fNbOfBBarrelErestSingles = sett.GetValue("NbOfBBarrelErestSingles", 4);
 	for(int i = 0; i < fNbOfBBarrelErestSingles; i++){
@@ -326,9 +330,10 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	fBBarrelErestSingleDeadLayer = sett.GetValue("BBarrelErestSingles.DeadLayer", 0.0) * CLHEP::um;
 	fBBarrelErestSingleLengthX = sett.GetValue("BBarrelErestSinglesLength.X", 50.0) * CLHEP::mm;
 	fBBarrelErestSingleLengthY = sett.GetValue("BBarrelErestSinglesLength.Y", 50.0) * CLHEP::mm;
-	fBBarrelErestSingleEnergyResolution = sett.GetValue("BBarrelErestSinglesEnergyResolution", 50) * CLHEP::keV;
+	fBBarrelErestSingleEnergyResolution = sett.GetValue("BBarrelErestSinglesEnergyResolution", 0.) * CLHEP::keV; // original 50 keV
 
-	// Second BBarrel deltaE
+	// ****************************************************** Second BBarrel deltaE ******************************************************
+	
 	fUseSecondBBarrelDeltaE = sett.GetValue("UseSecondBBarrelDeltaE", 0);
 	fNbOfSecondBBarrelDeltaESingles = sett.GetValue("NbOfSecondBBarrelDeltaESingles", 4);
 	for(int i = 0; i < fNbOfSecondBBarrelDeltaESingles; i++){
@@ -344,7 +349,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 	//fSecondBBarrelDeltaESingleStripWidth = sett.GetValue("SecondBBarrelDeltaESinglesStripWidth", 3.125) * CLHEP::mm;
 	fSecondBBarrelDeltaESingleStripWidthPar = sett.GetValue("SecondBBarrelDeltaESinglesStripWidthPar", 3.125) * CLHEP::mm; // added bei Leila
 	fSecondBBarrelDeltaESingleStripWidthPer = sett.GetValue("SecondBBarrelDeltaESinglesStripWidthPer", 3.125) * CLHEP::mm; // added bei Leila
-	fSecondBBarrelDeltaESingleEnergyResolution = sett.GetValue("SecondBBarrelDeltaESinglesEnergyResolution", 50) * CLHEP::keV;
+	fSecondBBarrelDeltaESingleEnergyResolution = sett.GetValue("SecondBBarrelDeltaESinglesEnergyResolution", 0.) * CLHEP::keV; // original 50 keV
 	fSecondBBarrelDeltaESingleFoilThickness = sett.GetValue("SecondBBarrelDeltaESinglesFoilThickness", -1.) * CLHEP::um;
 
 	// Forward Trapezoid deltaE
@@ -416,7 +421,7 @@ void TRexSettings::ReadSettingsFile(std::string settingsFile) {
 		fMiniballClusterPhi.push_back(sett.GetValue(Form("MiniballCluster.Phi.%i", clu), 0.) * CLHEP::degree);
 		fMiniballClusterSpin.push_back(sett.GetValue(Form("MiniballCluster.Spin.%i", clu), 0.) * CLHEP::degree);
 	}
-	fMiniballEnergyResolutionCore = sett.GetValue("MiniballEnergyResolutionCore", 2.4) * CLHEP::keV;
+	fMiniballEnergyResolutionCore = sett.GetValue("MiniballEnergyResolutionCore", 2.4) * keV;
 	fMiniballEnergyResolutionSegment = sett.GetValue("MiniballEnergyResolutionSegment", 1.9) * CLHEP::keV;
 }
 

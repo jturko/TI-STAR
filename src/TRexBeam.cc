@@ -69,6 +69,9 @@ void TRexBeam::ShootReactionPosition() {
 	fReactionY = CLHEP::RandFlat::shoot(-fBeamWidth / 2., fBeamWidth / 2.) * CLHEP::mm;
 
 	// choose z according to a flat distribution in the target
+	//fReactionZ = CLHEP::RandFlat::shoot(-TRexSettings::Get()->GetTargetThickness() / (2. * TRexSettings::Get()->GetTargetMaterialDensity()) / CLHEP::um,
+	//TRexSettings::Get()->GetTargetThickness() / (2. * TRexSettings::Get()->GetTargetMaterialDensity()) / CLHEP::um) * CLHEP::um;
+	//fReactionZ = CLHEP::RandFlat::shoot(-0.5, 0.5) * CLHEP::mm;
 	fReactionZ = CLHEP::RandFlat::shoot(-TRexSettings::Get()->GetTargetPhysicalLength()/(2*CLHEP::um), TRexSettings::Get()->GetTargetPhysicalLength()/(2*CLHEP::um))*CLHEP::um;
 	// units: although the target length is given as cm in the setting file but fReactionZ is in mm!
 	
@@ -101,6 +104,7 @@ void TRexBeam::DefineNuclei() {
 
 	fProjectile = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetProjectileName().c_str()));
 	fTarget = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetTargetName().c_str()));
+	//fTarget = *(IsotopeTable->Search(fTargetZ, fTargetA - fTargetZ));
 	fEjectile = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetEjectileName().c_str()));
 	fRecoil = *(fIsotopeTable->Search((char*)TRexSettings::Get()->GetRecoilName().c_str()));
 
@@ -157,9 +161,7 @@ Material* TRexBeam::GetTargetMaterial() {
 	return TargetMaterial;
 }
 
-void TRexBeam::FillCrossSectionGraph() {
-  if(TRexSettings::Get()->GetCrossSectionFile() == "") { std::cout <<"Hello from Leyla & Dennis" <<std::endl;return;}
-
+/*void TRexBeam::FillCrossSectionGraph() {
 	std::ifstream file(TRexSettings::Get()->GetCrossSectionFile().c_str());
 
 	if(file.bad()) {
@@ -229,14 +231,53 @@ void TRexBeam::FillCrossSectionGraph() {
 	fGrp->Write();
 	fEbeamCmHist->Write();
 	outSigmaEbeamCmFile.Close();
-}
+}*/
 
 
 void TRexBeam::CalculateReactionEnergyInTheTarget() {
 
-  G4double reactionPosInTarget = fReactionZ * TRexSettings::Get()->GetTargetMaterialDensity() + TRexSettings::Get()->GetTargetThickness() / 2.;
-  fReactionEnergy = fEnergyVsTargetDepth.Eval(reactionPosInTarget /(CLHEP::mg/CLHEP::cm2))*CLHEP::MeV;
-} 
+	// *********************************** Original first reactionZ then reactionEnergy*******************************
+
+	G4double reactionPosInTarget = fReactionZ * TRexSettings::Get()->GetTargetMaterialDensity() + TRexSettings::Get()->GetTargetThickness() / 2.;
+    fReactionEnergy = fEnergyVsTargetDepth.Eval(reactionPosInTarget /(CLHEP::mg/CLHEP::cm2))*CLHEP::MeV;
+
+	//std::cout << "fReactionZ = " << fReactionZ << " ,x = " << reactionPosInTarget /(CLHEP::mg/CLHEP::cm2) << " , E(x) = " << fReactionEnergy / CLHEP::MeV << " TargetMaterialDensity: "<<TRexSettings::Get()->GetTargetMaterialDensity()/(CLHEP::mg/CLHEP::cm3)<<std::endl; 
+
+	// *********************************** Vinzenz first reactionEnergy then reactionZ*******************************
+	
+	/*fRndReaction.SetSeed(0);
+	double fReacProbA = fRndReaction.Rndm();
+	double fReacProbB = fRndReaction.Rndm();
+	
+	double fSigmaTotalBarnStdr = 2.24; // barn (32029.12/180*12.57)
+	
+	double fReacProb = fSigmaTotalBarnStdr * 2.81865e-3 * 0.6022 / 4.; // bar * gr/cm2 (target areal density.81865 mg/cm2)
+	
+	//std::cout<<"\n fReacProb: "<<fReacProb<<" fEventCounter: "<<fEventCounter<<std::endl; 
+	
+	if((fEventCounter-1) %1000 == 0){ 
+	
+	fReactionEnergyCM = fEbeamCmHist->GetRandom()/1000. * CLHEP::MeV; // MeV	
+
+	fReactionEnergy = fReactionEnergyCM*(fTargetRestMass+fProjectileRestMass)/fTargetRestMass;//MeV
+
+	double rangeBeam = fRangeVsBeamEnergyLeila.Eval(fBeamEnergy / CLHEP::MeV);
+	double rangeReaction = fRangeVsBeamEnergyLeila.Eval(fReactionEnergy / CLHEP::MeV);
+
+	fReactionZ = (rangeBeam-rangeReaction);	
+	fReactionZ = (fReactionZ * 1000. * TRexSettings::Get()->GetTargetMaterialDensity() / (CLHEP::mg/CLHEP::cm2)*10. - TRexSettings::Get()->GetTargetPhysicalLength()/2.) * CLHEP::mm;
+	
+	//std::cout<<"\n fReactionZ: "<<fReactionZ<<" fReactionZ/(CLHEP::mg/CLHEP::cm2): "<<fReactionZ/(CLHEP::mg/CLHEP::cm2)<<" fReactionZ*(CLHEP::mg/CLHEP::cm2): "<<fReactionZ*(CLHEP::mg/CLHEP::cm2)<<" reaction: "<<fReacProbA<<" eventno: "<<fEventCounter<<std::endl;
+	
+	//std::cout<<"\n TRexSettings::Get()->GetTargetMaterialDensity(): "<<TRexSettings::Get()->GetTargetMaterialDensity()<<" TRexSettings::Get()->GetTargetMaterialDensity()/(CLHEP::mg/CLHEP::cm2): "<<TRexSettings::Get()->GetTargetMaterialDensity()/(CLHEP::mg/CLHEP::cm2)<<" TRexSettings::Get()->GetTargetMaterialDensity()*(CLHEP::mg/CLHEP::cm2): "<<TRexSettings::Get()->GetTargetMaterialDensity()*(CLHEP::mg/CLHEP::cm2)<<std::endl;
+	
+	//std::cout<<"\n TRexSettings::Get()->GetTargetThickness(): "<<TRexSettings::Get()->GetTargetThickness()<<" TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2): "<<TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2)<<" TRexSettings::Get()->GetTargetThickness()*(CLHEP::mg/CLHEP::cm2): "<<TRexSettings::Get()->GetTargetThickness()*(CLHEP::mg/CLHEP::cm2)<<std::endl;	
+	
+    }
+
+    else fReactionEnergyCM = -1.0;*/
+
+}
 
 void TRexBeam::CreateTreeBranches() {
 	if(!fTree) {
@@ -296,7 +337,8 @@ G4ParticleDefinition* TRexBeam::ParticleDefinition(int Z, int N, double eex) {
 void TRexBeam::SetEjectileGun(G4Event *anEvent) {
 	if(TRexSettings::Get()->SimulateEjectiles()) {
 		// particle definition
-		fParticleGunEjectile->SetParticleDefinition(ParticleDefinition(fEjectileZ, fEjectileA - fEjectileZ, fReactionEnergy));
+		//fParticleGunEjectile->SetParticleDefinition(ParticleDefinition(fEjectileZ, fEjectileA - fEjectileZ, fReactionEnergy)); // original
+		fParticleGunEjectile->SetParticleDefinition(ParticleDefinition(fEjectileZ, fEjectileA - fEjectileZ, fExcitationEnergy));
 
 		// emission point
 		fParticleGunEjectile->SetParticlePosition(G4ThreeVector(fReactionX, fReactionY, fReactionZ));

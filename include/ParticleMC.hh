@@ -31,6 +31,9 @@ class ParticleMC : public TObject {
 			fStripZ.clear();
 			fStripTrackID.clear();
 			fStripTime.clear();
+			fPosGlobalX.clear(); // leila delete
+			fPosGlobalY.clear(); // leila delete
+			fPosGlobalZ.clear(); // leila delete
 			fStripStopped.clear();
 
 			fRingNr.clear();
@@ -51,7 +54,8 @@ class ParticleMC : public TObject {
 		void SetResKinEnergy(double resKinEnergy)  { fResKinEnergy = resKinEnergy; }
 		void SetRear(double rear)  { fRear = rear; }
 		void SetEdet(double edet)    { fEdet = edet; }
-		void AddStrip(int xstrip, double energy, int a, int z, int trackID, double time, int stopped)  {
+		//void AddStrip(int xstrip, double energy, int a, int z, int trackID, double time, int stopped)  {
+		void AddStrip(int xstrip, double energy, int a, int z, int trackID, double time, int stopped)  { //leila
 			// version for resistive strip detectors
 			fStripNr.push_back(xstrip);
 			fStripEnergy.push_back(energy);
@@ -62,7 +66,22 @@ class ParticleMC : public TObject {
 			fStripStopped.push_back(stopped);
 			fMult++;
 		}
-		void AddRing(int strip, double energy, int a, int z, int trackID, double time, int stopped)  {
+		void AddStrip(int xstrip, double energy, int a, int z, int trackID, double time, double hitPosGlobalX, double hitPosGlobalY, double hitPosGlobalZ, int stopped)  { //leila
+			// version for resistive strip detectors
+			fStripNr.push_back(xstrip);
+			fStripEnergy.push_back(energy);
+			fStripA.push_back(a);
+			fStripZ.push_back(z);
+			fStripTrackID.push_back(trackID);
+			fStripTime.push_back(time);
+			fPosGlobalX.push_back(hitPosGlobalX); // leila
+			fPosGlobalY.push_back(hitPosGlobalY); // leila
+			fPosGlobalZ.push_back(hitPosGlobalZ); // leila
+			fStripStopped.push_back(stopped);
+			fMult++;
+		}
+		//void AddRing(int strip, double energy, int a, int z, int trackID, double time, int stopped)  {
+		void AddRing(int strip, double energy, int a, int z, int trackID, double time, int stopped)  { //leila
 			fRingNr.push_back(strip);
 			fRingEnergy.push_back(energy);
 			fRingA.push_back(a);
@@ -106,6 +125,9 @@ class ParticleMC : public TObject {
 		std::vector<int> GetStripZ() { return fStripZ; }
 		std::vector<int> GetStripTrackID() { return fStripTrackID; }
 		std::vector<double> GetStripTime() { return fStripTime; }
+		std::vector<double> GetPosGlobalX() { return fPosGlobalX; } // leila
+		std::vector<double> GetPosGlobalY() { return fPosGlobalY; } // leila
+		std::vector<double> GetPosGlobalZ() { return fPosGlobalZ; } // leila
 		std::vector<int> IsStripStopped() { return fStripStopped; }
 		std::vector<int> GetRingNr() { return fRingNr; }
 		std::vector<double> GetRingEnergy() { return fRingEnergy; }
@@ -130,6 +152,7 @@ class ParticleMC : public TObject {
 			result += fStripZ.size()*sizeof(int);
 			result += fStripTrackID.size()*sizeof(int);
 			result += fStripTime.size()*sizeof(double);
+			result += fPosGlobalX.size()*sizeof(double)*3; // leila
 			result += fRingNr.size()*sizeof(int);
 			result += fRingEnergy.size()*sizeof(double);
 			result += fRingA.size()*sizeof(int);
@@ -147,6 +170,9 @@ class ParticleMC : public TObject {
 		std::vector<int> fStripZ;
 		std::vector<int> fStripTrackID;
 		std::vector<double> fStripTime;
+		std::vector<double> fPosGlobalX;
+		std::vector<double> fPosGlobalY;
+		std::vector<double> fPosGlobalZ;
 		std::vector<int> fStripStopped;
 		std::vector<int> fRingNr;
 		std::vector<double> fRingEnergy;

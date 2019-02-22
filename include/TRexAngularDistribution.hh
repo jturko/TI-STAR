@@ -50,7 +50,7 @@ class TRexAngularDistribution : public TRexBeam, public MiniBallSource {
 		void ShootThetaCm(int levelNb);
 		void ShootReactionTypeAndExcitationEnergy();
 		//void ShootReactionPosition();
-		//void FillCrossSectionGraph(); // Leila
+		void FillCrossSectionGraph(); // Leila
 
 
 		size_t fNbOfLevels;
@@ -68,7 +68,7 @@ class TRexAngularDistribution : public TRexBeam, public MiniBallSource {
 		std::vector<MiniBallSourceLevel> fLevelsMB;
 		MiniBallSourceLevel fFeedingMB;
 
-		G4double fExcitationEnergy;
+		//G4double fExcitationEnergy; moved to TRexBeam.hh
 
 		//std::vector<TGraph> fGraphs;
 		std::vector<TGraph> fGraphsSin;

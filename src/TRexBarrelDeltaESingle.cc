@@ -29,7 +29,7 @@ TRexBarrelDeltaESingle::TRexBarrelDeltaESingle(std::string name, std::string dir
 
 		fDeadLayer = TRexSettings::Get()->GetFBarrelDeltaESingleDeadLayer();
 
-		fPos = G4ThreeVector(TRexSettings::Get()->GetFBarrelDeltaESingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad),
+		fPos = G4ThreeVector(TRexSettings::Get()->GetFBarrelDeltaESingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad) + (13.0/3.) * CLHEP::mm, // ### target shifting -13.0/3 | -12.24 mm
 									TRexSettings::Get()->GetFBarrelDeltaESingleDistanceToBeam()[fId] * sin(fStartAngleDetector / CLHEP::rad),
 									TRexSettings::Get()->GetFBarrelDeltaESinglePosZ()[fId]);
 
@@ -42,9 +42,11 @@ TRexBarrelDeltaESingle::TRexBarrelDeltaESingle(std::string name, std::string dir
 
 		fDeadLayer = TRexSettings::Get()->GetSecondFBarrelDeltaESingleDeadLayer();
 
-		fPos = G4ThreeVector(TRexSettings::Get()->GetSecondFBarrelDeltaESingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad),
+		fPos = G4ThreeVector(TRexSettings::Get()->GetSecondFBarrelDeltaESingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad) + 13.0 * CLHEP::mm,// shifting -13.0 mm
 									TRexSettings::Get()->GetSecondFBarrelDeltaESingleDistanceToBeam()[fId] * sin(fStartAngleDetector / CLHEP::rad),
 									TRexSettings::Get()->GetSecondFBarrelDeltaESinglePosZ()[fId]);
+	std::cout<<"fPos x "<<fPos.x()<<", y "<<fPos.y()<<", z "<<fPos.z()<<std::endl;
+	
 
 		fFoilThickness = TRexSettings::Get()->GetSecondFBarrelDeltaESingleFoilThickness();
 	} else if(fBaseName == "MBarrelDeltaESingle") {  
@@ -68,7 +70,7 @@ TRexBarrelDeltaESingle::TRexBarrelDeltaESingle(std::string name, std::string dir
 
 		fDeadLayer = TRexSettings::Get()->GetBBarrelDeltaESingleDeadLayer();
 
-		fPos = G4ThreeVector(TRexSettings::Get()->GetBBarrelDeltaESingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad),
+		fPos = G4ThreeVector(TRexSettings::Get()->GetBBarrelDeltaESingleDistanceToBeam()[fId] * cos(fStartAngleDetector / CLHEP::rad) + (13.0/3.) * CLHEP::mm, // ### target shifting -12.24 mm
 									TRexSettings::Get()->GetBBarrelDeltaESingleDistanceToBeam()[fId] * sin(fStartAngleDetector / CLHEP::rad),
 									TRexSettings::Get()->GetBBarrelDeltaESinglePosZ()[fId]);
 
@@ -146,54 +148,147 @@ void TRexBarrelDeltaESingle::ConstructSilicon(G4LogicalVolume* experimentalHall_
 void TRexBarrelDeltaESingle::ConstructPCB(G4LogicalVolume* experimentalHall_log) {
 	G4Material* pcb = TRexMaterials::Get()->GetMaterial("pcb");
 
-	G4double pcbWidth = 89 * CLHEP::mm;
-	G4double pcbThickness = 1.5 * CLHEP::mm;
-	G4double pcbLength = 54 * CLHEP::mm;
+	G4double pcbWidth = 80 * CLHEP::mm;
+	G4double pcbThickness = 0.6 * CLHEP::mm; // 1.6
+	G4double pcbLength = 75 * CLHEP::mm;
 	G4double pcbRecessWidth = 23 * CLHEP::mm;
 	G4double pcbRecessLength = 22 * CLHEP::mm;
-	G4double barrelDisplacement = 16.5 * CLHEP::mm;
+	G4double barrelDisplacementX = -12.8 * CLHEP::mm;// target shifted --> 12.8
+	G4double barrelDisplacementZ = 10.25 * CLHEP::mm;// target shifted --> -10.25
 
 	G4Box* PCB_dE = new G4Box("PCB_dE", pcbThickness / 2., pcbWidth / 2., pcbLength / 2.);
 
 	G4Box* PCB_hole = new G4Box("PCB_hole", pcbThickness/1.9, fDetectorLengthX / 2., fDetectorLengthY / 2.);
-	G4Box* PCB_corner = new G4Box("PCB_corner", pcbThickness / 1.9, pcbRecessWidth /2. + 0.1, pcbRecessLength /2. + 0.1);
+	//G4Box* PCB_corner = new G4Box("PCB_corner", pcbThickness / 1.9, pcbRecessWidth /2. + 0.1, pcbRecessLength /2. + 0.1);commented out by Leila
 
 	// subtract hole for detector
 	G4SubtractionSolid* PCBQuadrant_solid = new G4SubtractionSolid("deltaPCB_solid", PCB_dE, PCB_hole, 0,//new G4RotationMatrix(),
-			G4ThreeVector(0, barrelDisplacement, 0));
+			G4ThreeVector(0.0, barrelDisplacementX, barrelDisplacementZ));//G4ThreeVector(0.0, barrelDisplacement, .0));
 
 	// subtract corner
-	PCBQuadrant_solid = new G4SubtractionSolid("deltaPCB_solid", PCBQuadrant_solid, PCB_corner, 0,//new G4RotationMatrix(),
-			G4ThreeVector(0,  -(pcbWidth / 2.- pcbRecessWidth /2.), pcbLength /2. - pcbRecessLength/2.));
+	//PCBQuadrant_solid = new G4SubtractionSolid("deltaPCB_solid", PCBQuadrant_solid, PCB_corner, 0,//new G4RotationMatrix(), G4ThreeVector(0,  -(pcbWidth / 2.- pcbRecessWidth /2.), pcbLength /2. - pcbRecessLength/2.)); commented out by Leila
 
 	G4LogicalVolume* PcbBarrel_log = new G4LogicalVolume(PCBQuadrant_solid, pcb, "PCBForwardBarrel_log");
 
 	fRotMatrixPcb = fRotMatrix;
 
 	G4ThreeVector pcbPos = fPos;
-	pcbPos.setX(fPos.x() - barrelDisplacement * sin(fStartAngleDetector / CLHEP::rad));
-	pcbPos.setY(fPos.y() - barrelDisplacement * cos(fStartAngleDetector / CLHEP::rad));
+	
+	pcbPos.setX(fPos.x() - barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));
+	pcbPos.setY(fPos.y() - barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
+	pcbPos.setZ(fPos.z() + barrelDisplacementZ * CLHEP::mm);// target shifted --> - barrelDisplacementZ * CLHEP::mm
 
-	if(fabs(fPos.x()) < 0.1) {
+	std::cout<<"fPos x "<<fPos.x()<<", y "<<fPos.y()<<", z "<<fPos.z()<<std::endl;
+	std::cout<<"x "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+	
+	//if(fabs(fPos.x()) < 0.1) {
+		
 		fRotMatrixPcb->rotateX(180.*CLHEP::degree);
-		pcbPos.setX(fPos.x() + barrelDisplacement * sin(fStartAngleDetector / CLHEP::rad));
-		pcbPos.setY(fPos.y() + barrelDisplacement * cos(fStartAngleDetector / CLHEP::rad));
-	}
+		pcbPos.setX(fPos.x() + barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));
+		pcbPos.setY(fPos.y() + barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
+	
+	//}
 
+	std::cout<<"x "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+	
 	if(fDirection == "backward") {
-		pcbPos.setX(fPos.x() - barrelDisplacement * sin(fStartAngleDetector / CLHEP::rad));
-		pcbPos.setY(fPos.y() - barrelDisplacement * cos(fStartAngleDetector / CLHEP::rad));
+		
+		pcbPos.setX(fPos.x() - barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));// target shifted --> + barrelDisplacementX * CLHEP::mm
+		pcbPos.setY(fPos.y() - barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
+		pcbPos.setZ(fPos.z() - barrelDisplacementZ * CLHEP::mm);// target shifted --> + barrelDisplacementZ * CLHEP::mm
 
 		if(fabs(fPos.y()) < 0.1) {
 			fRotMatrixPcb->rotateY(180.*CLHEP::degree);
-			pcbPos.setX(fPos.x() + barrelDisplacement * sin(fStartAngleDetector / CLHEP::rad));
-			pcbPos.setY(fPos.y() + barrelDisplacement * cos(fStartAngleDetector / CLHEP::rad));
+			pcbPos.setX(fPos.x() + barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));
+			pcbPos.setY(fPos.y() + barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
 		}
 
-		fRotMatrixPcb->rotateZ(-180.*CLHEP::degree);
+		//fRotMatrixPcb->rotateZ(-180.*CLHEP::degree); // original
+		fRotMatrixPcb->rotateX(-180.*CLHEP::degree);
 	}
+	
+	std::cout<<"x "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+	
+	// because the 2. layer is single not double as the first layer
+	
+	if(fBaseName == "SecondFBarrelDeltaESingle") { // added by Leila start
+		
+		pcbWidth = 140. * CLHEP::mm;
+		pcbThickness = 0.6 * CLHEP::mm; // 1.6
+		pcbLength = 140. * CLHEP::mm;
+		barrelDisplacementX = -13.0 * CLHEP::mm;// before shifting: -13.3
+		barrelDisplacementZ = 18.5 * CLHEP::mm;// before shifting 18.5
+		
+		std::cout<<" 2. forward layer x : "<<fDetectorLengthX<<" y: "<<fDetectorLengthY<<" fName: "<<fName<<std::endl;
+		// 2. forward layer x : 100 y: 100 fName: SecondFBarrelDeltaESingle0
+		// 2. forward layer x : 100 y: 100 fName: SecondFBarrelDeltaESingle1
+
+		G4Box* PCB_dE2 = new G4Box("PCB_dE2", pcbThickness / 2., pcbWidth / 2., pcbLength / 2.);
+		
+		G4Box* PCB_hole2 = new G4Box("PCB_hole2", pcbThickness/1.9, fDetectorLengthX / 2., fDetectorLengthY / 2.);
+		
+		G4SubtractionSolid* PCBQuadrant_solid2 = new G4SubtractionSolid("deltaPCB_solid2", PCB_dE2, PCB_hole2, 0, G4ThreeVector(0.0, barrelDisplacementX, barrelDisplacementZ));// before shifting  + barrelDisplacementZ
+		
+		G4LogicalVolume* PcbBarrel_log2= new G4LogicalVolume(PCBQuadrant_solid2, pcb, "PCBForwardBarrel_log2");
+		
+		pcbPos.setX(fPos.x() - barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad)-2*13*CLHEP::mm);// before shifting  - barrelDisplacementX *
+		pcbPos.setY(fPos.y() - barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
+		pcbPos.setZ(fPos.z() + barrelDisplacementZ * CLHEP::mm);// before shifting + barrelDisplacementZ * CLHEP::mm
+		
+		//fRotMatrixPcb->rotateX(-180.*CLHEP::degree);
+
+		if(fabs(fPos.x()) < 0.1) { // before shifting fPos.x < 0.1
+		
+		pcbPos.setX(fPos.x() + barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));// before shifting  + barrelDisplacementX *
+		pcbPos.setY(fPos.y() + barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
+	
+	}
+	
+	std::cout<<" after x SecondFBarrelDeltaESingle0 "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+	
+	
+	if(fName == "SecondFBarrelDeltaESingle0") new G4PVPlacement(fRotMatrixPcb, pcbPos, PcbBarrel_log2, "PCBForwardBarrel", experimentalHall_log, false, 0);
+	if(TRexSettings::Get()->Colours()) PcbBarrel_log2->SetVisAttributes(TRexColour::Get()->darkgreen);
+	
+		} // added by Leila end
+		
+		if(fName == "SecondFBarrelDeltaESingle1"){
+			
+		barrelDisplacementZ = -18.5 * CLHEP::mm;// before shifting -18.5 mm
+		
+		G4Box* PCB_dE3 = new G4Box("PCB_dE3", pcbThickness / 2., pcbWidth / 2., pcbLength / 2.);
+		G4Box* PCB_hole3 = new G4Box("PCB_hole3", pcbThickness/1.9, fDetectorLengthX / 2., fDetectorLengthY / 2.);
+		G4SubtractionSolid* PCBQuadrant_solid3 = new G4SubtractionSolid("deltaPCB_solid3", PCB_dE3, PCB_hole3, 0, G4ThreeVector(0.0, barrelDisplacementX, barrelDisplacementZ));
+		
+		G4LogicalVolume* PcbBarrel_log3= new G4LogicalVolume(PCBQuadrant_solid3, pcb, "PCBForwardBarrel_log3");
+		
+		std::cout<<" before x SecondFBarrelDeltaESingle1 "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+			
+		fRotMatrixPcb->rotateX(180.*CLHEP::degree);
+		
+		std::cout<<" after rotation x SecondFBarrelDeltaESingle1 "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+		
+		pcbPos.setX(fPos.x() - barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));// before shifting  - barrelDisplacementX *
+		pcbPos.setZ(fPos.z() + barrelDisplacementZ * CLHEP::mm);
+
+		if(fabs(fPos.x()) < 0.1) {
+		
+		pcbPos.setX(fPos.x() - barrelDisplacementX * sin(fStartAngleDetector / CLHEP::rad));// before shifting - barrelDisplacementX *
+		pcbPos.setY(fPos.y() + barrelDisplacementX * cos(fStartAngleDetector / CLHEP::rad));
+	
+	}		
+	
+	if(fName == "SecondFBarrelDeltaESingle1") new G4PVPlacement(fRotMatrixPcb, pcbPos, PcbBarrel_log3, "PCBForwardBarrel", experimentalHall_log, false, 0);		
+		if(TRexSettings::Get()->Colours()) PcbBarrel_log3->SetVisAttributes(TRexColour::Get()->darkgreen);
+	
+	}
+		
+	std::cout<<"x "<<pcbPos.x()<<", y "<<pcbPos.y()<<", z "<<pcbPos.z()<<std::endl;
+	
 
 	//G4VPhysicalVolume* phys_vol =
+	
+	//if(fBaseName == "FBarrelDeltaESingle") 
 	new G4PVPlacement(fRotMatrixPcb, pcbPos, PcbBarrel_log, "PCBForwardBarrel", experimentalHall_log, false, 0);
 
 	if(TRexSettings::Get()->Colours()) {
@@ -226,7 +321,9 @@ void TRexBarrelDeltaESingle::ConstructFoil(G4LogicalVolume* experimentalHall_log
 	G4Material* foilMaterial = TRexMaterials::Get()->GetMaterial("mylar");
 
 	G4double foilDistance = (1.0 + 2.0) * CLHEP::mm;
+	//G4double foilWidth = (TRexSettings::Get()->GetBBarrelDeltaESingleDistanceToBeam()[fId] -  1 * (foilDistance - fFoilThickness / 2.)) * 2;
 	G4double foilWidth = (TRexSettings::Get()->GetBBarrelDeltaESingleDistanceToBeam()[fId] - 1 * (foilDistance - fFoilThickness / 2.)) * 2;
+	//G4double foilLength = 54 * CLHEP::mm;
 	G4double foilLength = 4 * CLHEP::mm;
 
 	if(fDirection == "forward") {
@@ -246,8 +343,8 @@ void TRexBarrelDeltaESingle::ConstructFoil(G4LogicalVolume* experimentalHall_log
 	G4ThreeVector position = fPos;
 	position.setX(fPos.x() - (foilDistance - fFoilThickness / 2.) * cos(fStartAngleDetector / CLHEP::rad));
 	position.setY(fPos.y() - (foilDistance - fFoilThickness / 2.) * sin(fStartAngleDetector / CLHEP::rad));
-  
-	new G4PVPlacement(G4Transform3D(*fRotMatrix, position), foil_log, "foil", experimentalHall_log, false, 0);
+
+	//new G4PVPlacement(G4Transform3D(*fRotMatrix, position), foil_log, "foil", experimentalHall_log, false, 0); // commented out by Leila
 
 	if(TRexSettings::Get()->Colours()) {
 		foil_log->SetVisAttributes(TRexColour::Get()->darkblue);//silver);
