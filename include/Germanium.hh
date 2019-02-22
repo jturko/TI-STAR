@@ -31,6 +31,7 @@ class Crystal : public TObject {
 		void SetCryID(int cry) { fCryID = cry; }
 		void SetCore(double energy, MyTime_t time);
 		void AddSegment(int segment, double energy, MyTime_t time);
+		void SetTime(double time) { fTime = time; }
 		//get
 		int GetCryID() { return fCryID; }
 		double GetTime() { return fTime; }
@@ -91,7 +92,32 @@ class Germanium : public TObject {
 		std::vector<Crystal> GetCrystal() {
 			return fCrystal;
 		}
-
+		
+		double* GetPosition() {
+                        return positionWorld;
+                }
+                
+        void SetPosition(double TRX, double TRY, double TRZ) {
+                        positionWorld[0] = TRX;
+                        positionWorld[1] = TRY;
+                        positionWorld[2] = TRZ;
+                }
+                
+        double GetTheta() {
+                        return theta;
+                }
+                
+        void SetTheta(double thetaIn) {
+                        theta = thetaIn;
+                }
+                
+//      double GetnoComptE() {
+//                      return noComptE;
+//            }
+//      void SetnoComptE(double energy) {
+//                      noComptE = energy;
+//              }
+                
 		int GetCluID() {
 			return fClusterID;
 		}
@@ -103,8 +129,16 @@ class Germanium : public TObject {
 
 	protected:
 		std::vector<Crystal> fCrystal;
+		double positionWorld [3];
+		double theta;
+//      double noComptE;
 		int fClusterID;
 		int fStrange;
+		double thetaIn;
+		//double fCoreEnergy;
+		std::vector<double> fSegEnergy;
+		int fCryID;
+		MyTime_t fTime;
 
 		ClassDef(Germanium, 2)
 };

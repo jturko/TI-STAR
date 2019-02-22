@@ -117,6 +117,8 @@ class TRexBeam : public TRexBaseGenerator {
 		G4double fScatteringProbability;
 		G4double fThetaCM_min;
 		size_t fReaction;
+		
+		G4double fExcitationEnergy;
 
 		G4LorentzVector fEjectileLab;
 		G4LorentzVector fRecoilLab;

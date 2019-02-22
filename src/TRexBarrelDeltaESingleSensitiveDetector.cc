@@ -36,15 +36,15 @@ TRexBarrelDeltaESingleSensitiveDetector::TRexBarrelDeltaESingleSensitiveDetector
 		fLengthX = TRexSettings::Get()->GetFBarrelDeltaESingleLengthX();
 		fLengthY = TRexSettings::Get()->GetFBarrelDeltaESingleLengthY();
 		//fStripWidth = TRexSettings::Get()->GetFBarrelDeltaESingleStripWidth();
-		fStripWidthPar = TRexSettings::Get()->GetFBarrelDeltaESingleStripWidthPar(); // added bei Leila
-		fStripWidthPer = TRexSettings::Get()->GetFBarrelDeltaESingleStripWidthPer(); // added bei Leila
+		fStripWidthPar = TRexSettings::Get()->GetFBarrelDeltaESingleStripWidthPar();
+		fStripWidthPer = TRexSettings::Get()->GetFBarrelDeltaESingleStripWidthPer(); 
 		fEnergyResolution = TRexSettings::Get()->GetFBarrelDeltaESingleEnergyResolution();
 	} else if(fBaseName == "SecondFBarrelDeltaESingle") {
 		fLengthX = TRexSettings::Get()->GetSecondFBarrelDeltaESingleLengthX();
 		fLengthY = TRexSettings::Get()->GetSecondFBarrelDeltaESingleLengthY();
 		//fStripWidth = TRexSettings::Get()->GetSecondFBarrelDeltaESingleStripWidth();
-		fStripWidthPar = TRexSettings::Get()->GetSecondFBarrelDeltaESingleStripWidthPar(); // added bei Leila
-		fStripWidthPer = TRexSettings::Get()->GetSecondFBarrelDeltaESingleStripWidthPer(); // added bei Leila
+		fStripWidthPar = TRexSettings::Get()->GetSecondFBarrelDeltaESingleStripWidthPar();
+		fStripWidthPer = TRexSettings::Get()->GetSecondFBarrelDeltaESingleStripWidthPer(); 
 		fEnergyResolution = TRexSettings::Get()->GetSecondFBarrelDeltaESingleEnergyResolution();
 	} else if(fBaseName == "MBarrelDeltaESingle") {
 		fLengthX = TRexSettings::Get()->GetMBarrelDeltaESingleLengthX();
@@ -55,15 +55,15 @@ TRexBarrelDeltaESingleSensitiveDetector::TRexBarrelDeltaESingleSensitiveDetector
 		fLengthX = TRexSettings::Get()->GetBBarrelDeltaESingleLengthX();
 		fLengthY = TRexSettings::Get()->GetBBarrelDeltaESingleLengthY();
 		//fStripWidth = TRexSettings::Get()->GetBBarrelDeltaESingleStripWidth();
-		fStripWidthPar = TRexSettings::Get()->GetBBarrelDeltaESingleStripWidthPar(); // added bei Leila
-		fStripWidthPer = TRexSettings::Get()->GetBBarrelDeltaESingleStripWidthPer(); // added bei Leila
+		fStripWidthPar = TRexSettings::Get()->GetBBarrelDeltaESingleStripWidthPar();
+		fStripWidthPer = TRexSettings::Get()->GetBBarrelDeltaESingleStripWidthPer();
 		fEnergyResolution = TRexSettings::Get()->GetBBarrelDeltaESingleEnergyResolution();
 	} else if(fBaseName == "SecondBBarrelDeltaESingle") {
 		fLengthX = TRexSettings::Get()->GetSecondBBarrelDeltaESingleLengthX();
 		fLengthY = TRexSettings::Get()->GetSecondBBarrelDeltaESingleLengthY();
 		//fStripWidth = TRexSettings::Get()->GetSecondBBarrelDeltaESingleStripWidth();
-		fStripWidthPar = TRexSettings::Get()->GetSecondBBarrelDeltaESingleStripWidthPar(); // added bei Leila
-		fStripWidthPer = TRexSettings::Get()->GetSecondBBarrelDeltaESingleStripWidthPer(); // added bei Leila
+		fStripWidthPar = TRexSettings::Get()->GetSecondBBarrelDeltaESingleStripWidthPar();
+		fStripWidthPer = TRexSettings::Get()->GetSecondBBarrelDeltaESingleStripWidthPer(); 
 		fEnergyResolution = TRexSettings::Get()->GetSecondBBarrelDeltaESingleEnergyResolution();
 	} else {
 		std::cerr<<"Detector Name "<<fBaseName<<" is wrong!"<<std::endl;
@@ -105,10 +105,10 @@ G4bool TRexBarrelDeltaESingleSensitiveDetector::ProcessHits(G4Step *aStep,
 G4bool TRexBarrelDeltaESingleSensitiveDetector::ProcessHits_constStep(const G4Step * aStep,
 		G4TouchableHistory* ROHist) {
 	// only primary particle hits are considered (no secondaries)
-	if(aStep->GetTrack()->GetParentID() != 0 || aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV) {
+	//if(aStep->GetTrack()->GetParentID() != 0 || aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV) {
 	//using energy cut only, allows incoming beam to generate detectable
 	//particles
-	//if (aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV){
+	if (aStep->GetTotalEnergyDeposit() < 1.*CLHEP::eV){
 		return false;
 	}
 
@@ -138,14 +138,15 @@ void TRexBarrelDeltaESingleSensitiveDetector::EndOfEvent(G4HCofThisEvent*) {
 		std::vector<int> stripA;
 		std::vector<int> stripZ;
 		std::vector<int> stripTrackID;
-		std::vector<G4double> stripTime;
+		std::vector<double> stripTime;
+		std::vector<G4ThreeVector> hitPosGlobal; // leila
 		std::vector<int> stripStopped;
 		std::vector<int> ringNb;
 		std::vector<G4double> ringEnergy;
 		std::vector<int> ringA;
 		std::vector<int> ringZ;
 		std::vector<int> ringTrackID;
-		std::vector<G4double> ringTime;
+		std::vector<double> ringTime;
 		std::vector<int> ringStopped;
 
 		int currentStripNb = -1;
@@ -187,6 +188,7 @@ void TRexBarrelDeltaESingleSensitiveDetector::EndOfEvent(G4HCofThisEvent*) {
 				stripTrackID.push_back((*fHitCollection)[i]->GetTrackID());
 				stripTime.push_back((*fHitCollection)[i]->GetTime());
 				stripStopped.push_back(IsStopped(i, resEnergy));
+				hitPosGlobal.push_back((*fHitCollection)[i]->GetHitPosition());
 			}
 			// for double-sided strip detectors we have to do the same for the strips parallel to the beam (called rings here)
 			if(!TRexSettings::Get()->ResistiveStrips()) {
@@ -210,7 +212,7 @@ void TRexBarrelDeltaESingleSensitiveDetector::EndOfEvent(G4HCofThisEvent*) {
 					ringZ.push_back((*fHitCollection)[i]->GetParticleZ());
 					ringTrackID.push_back((*fHitCollection)[i]->GetTrackID());
 					ringTime.push_back((*fHitCollection)[i]->GetTime());
-					ringStopped.push_back(IsStopped(i, resEnergy));
+ 					ringStopped.push_back(IsStopped(i, resEnergy));
 				}
 			}
 		}
@@ -220,7 +222,7 @@ void TRexBarrelDeltaESingleSensitiveDetector::EndOfEvent(G4HCofThisEvent*) {
 			if(TRexSettings::Get()->IncludeEnergyResolution()) {
 					stripEnergy[i] += CLHEP::RandGauss::shoot(0., fEnergyResolution / CLHEP::keV) * CLHEP::keV;
 			}
-			fBarrelDeltaESingle->AddStrip(stripNb[i], stripEnergy[i]/CLHEP::keV, stripA[i], stripZ[i], stripTrackID[i], stripTime[i], stripStopped[i]);
+			fBarrelDeltaESingle->AddStrip(stripNb[i], stripEnergy[i]/CLHEP::keV, stripA[i], stripZ[i], stripTrackID[i], stripTime[i], hitPosGlobal[i].x(), hitPosGlobal[i].y(), hitPosGlobal[i].z(), stripStopped[i]);// stripHitPosGlobal[i] added by leila
 		}
 
 		// loop over all rings we've found and add them
@@ -228,7 +230,7 @@ void TRexBarrelDeltaESingleSensitiveDetector::EndOfEvent(G4HCofThisEvent*) {
 			if(TRexSettings::Get()->IncludeEnergyResolution()) {
 					ringEnergy[i] += CLHEP::RandGauss::shoot(0., fEnergyResolution / CLHEP::keV) * CLHEP::keV;
 			}
-			fBarrelDeltaESingle->AddRing(ringNb[i], ringEnergy[i]/CLHEP::keV, ringA[i], ringZ[i], ringTrackID[i], ringTime[i], ringStopped[i]);
+			fBarrelDeltaESingle->AddRing(ringNb[i], ringEnergy[i]/CLHEP::keV, ringA[i], ringZ[i], ringTrackID[i], ringTime[i], ringStopped[i]); // ringHitPosGlobal[i] added by leila
 		}
 
 		// for a resistive strip detector we set the energy of the rear to the total energy deposited

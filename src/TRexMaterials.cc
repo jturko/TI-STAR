@@ -95,6 +95,12 @@ TRexMaterials::TRexMaterials() {
 	G4Material* beryllium = fManager->FindOrBuildMaterial("G4_Be");
 	beryllium->SetName("beryllium");
 
+	G4Material* titanium = fManager->FindOrBuildMaterial("G4_Ti");
+	titanium->SetName("titanium");
+	
+	G4Material* carbon = fManager->FindOrBuildMaterial("G4_C");
+	carbon->SetName("carbon");
+	
 	G4Material* lh2 = fManager->FindOrBuildMaterial("G4_lH2");
 	lh2->SetName("LH2");
 
@@ -704,8 +710,8 @@ void TRexMaterials::BuildSurfaceMirror() {
 }
 
 G4Material* TRexMaterials::BuildDeuterium() {
-	G4Material* deuteriumGas = new G4Material("2H", 0.180 * CLHEP::kg/CLHEP::m3, 1,
-			kStateGas, 273 * CLHEP::kelvin, 1. * CLHEP::atmosphere);//10.0e-3. * CLHEP::atmosphere, 298 * CLHEP::kelvin
+	G4Material* deuteriumGas = new G4Material("2H", 0.1645 * CLHEP::kg/CLHEP::m3, 1,
+			kStateGas, 298 * CLHEP::kelvin, 1. * CLHEP::atmosphere);//10.0e-3. * CLHEP::atmosphere, 298 * CLHEP::kelvin
 
 	deuteriumGas->AddElement(fElD,4);
 

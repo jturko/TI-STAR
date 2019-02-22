@@ -22,7 +22,7 @@ TRexAngularDistribution::TRexAngularDistribution() :
 	// write the given angular distribution from the text file into Root histograms
 	FillAngularDistributionGraphs();
 	FillAngularDistributionHistos();
-	FillCrossSectionGraph(); // Leila
+	//FillCrossSectionGraph(); // Leila #######
 	
 	//fEventCounter;
 }
@@ -38,8 +38,12 @@ void TRexAngularDistribution::GeneratePrimaries(G4Event *anEvent) {
 		
 		fTargetMaterial = GetTargetMaterial();
 		std::cout << "TargetMaterialName for energy loss calculation in the target = " << fTargetMaterial->Name() << std::endl;
-			fKinematics = new Kinematic(&fProjectile, fTargetMaterial, TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2));
-			fEnergyVsTargetDepth = *(fKinematics->EnergyVsThickness(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
+		
+		fKinematics = new Kinematic(&fProjectile, fTargetMaterial, TRexSettings::Get()->GetTargetThickness()/(CLHEP::mg/CLHEP::cm2));
+		
+		fEnergyVsTargetDepth = *(fKinematics->EnergyVsThickness(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
+		fRangeVsBeamEnergyLeila = *(fKinematics->RangeVsEnergy(fBeamEnergy / CLHEP::MeV, TRexSettings::Get()->GetTargetThickness() / 1000 / (CLHEP::mg/CLHEP::cm2)));
+				
 		isDefined = true;
 		
 		// calculate scattering probability
@@ -56,10 +60,12 @@ void TRexAngularDistribution::GeneratePrimaries(G4Event *anEvent) {
 	// shoot the emission point
 	ShootReactionPosition();
 	
-
+	//fEventCounter = fEventCounter +1; ##########
 
 	// calculate reaction energy in the target
 	CalculateReactionEnergyInTheTarget();
+	
+	//if(fReactionEnergyCM == -1.0) return; #######
 
 	// shoot reaction type and extract the corresponding excitation energy
 	ShootReactionTypeAndExcitationEnergy();
@@ -124,7 +130,7 @@ void TRexAngularDistribution::ShootThetaCm(int levelNb) {
 		G4double rand = CLHEP::RandFlat::shoot(0., 1.);
 		fThetaCM = 2.* asin(1. / sqrt(1. / sin(fThetaCM_min*0.5) / sin(fThetaCM_min*0.5) - rand / norm));
 
-		//std::cout << "fThetaCM = " << fThetaCM / CLHEP::degree << std::endl;
+		//std::cout << "fThetaCM = " << fThetaCM / degree << std::endl;
 	}
 }
 
@@ -171,11 +177,11 @@ void TRexAngularDistribution::ShootReactionTypeAndExcitationEnergy() {
 }
 
 void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
-	//fThetaCM = 70. * CLHEP::degree;
+	//fThetaCM = 70. * degree;
 
 	// particle momentum direction
 	fEjectilePhi = CLHEP::RandFlat::shoot(-M_PI, M_PI) * CLHEP::rad;
-	//fEjectilePhi = 80.0 * CLHEP::degree;
+	//fEjectilePhi = 80.0 * degree;
 	fRecoilPhi = -fEjectilePhi;
 
 	//std::cout << "fReaction = " << fReaction << ": projectile = " << fProjectile.A() << " , target = " << fTarget.A() << " , ejectile = " << fEjectile.A() << " , recoil = " << fRecoil.A() << std::endl;
@@ -231,7 +237,7 @@ void TRexAngularDistribution::ShootEjectileAndRecoilDirections() {
 		Kinematic targetreco(&fEjectile, fTargetMaterial, travelLength / (CLHEP::mg/CLHEP::cm2));
 		G4double energyAfterTarget = fEjectileEnergy - targetreco.EnergyLoss(fEjectileEnergy / CLHEP::MeV) * CLHEP::MeV;
 
-		//std::cout << "energyMiddle = " << fEjectileEnergy << " , energyLoss = " << targetreco.EnergyLoss(fEjectileEnergy / CLHEP::MeV) << " , energy after = " << energyAfterTarget << std::endl;
+		//std::cout << "energyMiddle = " << fEjectileEnergy << " , energyLoss = " << targetreco.EnergyLoss(fEjectileEnergy / MeV) << " , energy after = " << energyAfterTarget << std::endl;
 
 		ejectileMomentumVectorLab.setRThetaPhi(fKinematics->Momentum(energyAfterTarget, fEjectileRestMass), fEjectileTheta, fEjectilePhi);
 		fEjectileLabAfterTarget.setE(fEjectileRestMass + energyAfterTarget);
@@ -252,13 +258,15 @@ void TRexAngularDistribution::ShootGamma() {
 
 		for(int i = 0; i < GetNbOfGammas(); i++) {
 			// gamma in the CM frame
-			boostedGamma.set(GetGammaEnergy(i), GetGammaDirection(i));
+			//boostedGamma.set(GetGammaEnergy(i), GetGammaDirection(i));// ##### original (1)
+			boostedGamma.set(GetGammaEnergy(i), GetGammaEnergy(i)*GetGammaDirection(i)); // somehow generated gammas are not correct
 
 			// boot CM frame to the lab frame (assumption: gamma is emitted in the middle of the target!)
-			//boostedGamma.boost(fEjectileLab.vect(), fEjectileLab.beta());
+			//boostedGamma.boost(fEjectileLab.vect(), fEjectileLab.beta());// ##### original (2)
+			boostedGamma.boost(fEjectileLab.vect(), fEjectileLab.beta());
 
 			// boot CM frame to the lab frame (assumption: gamma is emitted after the target!)
-			boostedGamma.boost(fEjectileLabAfterTarget.vect(), fEjectileLabAfterTarget.beta());
+			//boostedGamma.boost(fEjectileLabAfterTarget.vect(), fEjectileLabAfterTarget.beta()); // ##### original (3)
 
 			//G4std::cout << "fEjectileLab.beta() = " << fEjectileLab.beta() << " , fEjectileLabAfterTarget.beta() = " << fEjectileLabAfterTarget.beta() << std::endl;
 
@@ -302,7 +310,8 @@ void TRexAngularDistribution::FillAngularDistributionGraphs() {
 			file >> theta[i][th] >> sigma[i][th];
 
 			thetaSin[i][th] = theta[i][th] / 180 * TMath::Pi();
-			sigmaSin[i][th] = sigma[i][th] * sin(thetaSin[i][th]);
+			sigmaSin[i][th] = sigma[i][th] * sin(thetaSin[i][th]); // original #############################
+			//sigmaSin[i][th] = 10. * sin(thetaSin[i][th]); // set to a fixed value e.g. 10 mb  #################
 			//std::cout << thetaSin[i][th] << " " << sigmaSin[i][th] << std::endl;
 		}
 	}
@@ -437,13 +446,13 @@ void TRexAngularDistribution::FillAngularDistributionHistos() {
 
 void TRexAngularDistribution::CalculateArealDensity() {
 	if(fTargetMaterial->NumberOfElements() == 1) {
-	  fArealDensity.push_back(TRexSettings::Get()->GetTargetThickness() * CLHEP::Avogadro / (fTargetMaterial->GetElement(0)->A() * CLHEP::g/CLHEP::mole));
+		fArealDensity.push_back(TRexSettings::Get()->GetTargetThickness() * CLHEP::Avogadro / (fTargetMaterial->GetElement(0)->A() * CLHEP::g/CLHEP::mole));
 	} else {
 		double atomicRatio[2] = {1.0, TRexSettings::Get()->GetTargetAtomicRatio()};
 
 		for(size_t i = 0; i < fTargetMaterial->NumberOfElements(); ++i) {
 			fArealDensity.push_back(atomicRatio[i] * TRexSettings::Get()->GetTargetThickness() * CLHEP::Avogadro /
-						(fTargetMaterial->GetElement(0)->A() * CLHEP::g/CLHEP::mole + TRexSettings::Get()->GetTargetAtomicRatio() * fTargetMaterial->GetElement(1)->A() * CLHEP::g/CLHEP::mole));
+					(fTargetMaterial->GetElement(0)->A() * CLHEP::g/CLHEP::mole + TRexSettings::Get()->GetTargetAtomicRatio() * fTargetMaterial->GetElement(1)->A() * CLHEP::g/CLHEP::mole));
 		}
 	}
 
@@ -471,7 +480,7 @@ void TRexAngularDistribution::CalculateCrossSectionIntegral() {
 	// elastic scattering (using Rutherford scattering)
 	for(size_t i = 0; i < fTargetMaterial->NumberOfElements(); ++i) {
 		// Rutherford factor
-	  G4double RF = fProjectileZ * fTargetMaterial->Z(i) * CLHEP::eplus * CLHEP::eplus / (16. * M_PI * CLHEP::epsilon0);
+		G4double RF = fProjectileZ * fTargetMaterial->Z(i) * CLHEP::eplus * CLHEP::eplus / (16. * M_PI * CLHEP::epsilon0);
 		RF *= RF;
 
 		G4double fBeamEnergyMiddleTarget = fEnergyVsTargetDepth.Eval(TRexSettings::Get()->GetTargetThickness() / 2. /(CLHEP::mg/CLHEP::cm2))*CLHEP::MeV;

@@ -31,6 +31,17 @@ class TRexEventAction : public MiniBallEventAction {
 
 		void SetTree(TTree *tree);
 		void CreateBranches();
+		
+		void setGamTotal(G4double eTotal){
+			//std::cout<<"Pre Add energy: "<<gamTotalE<<std::endl;
+			gamTotalE = eTotal;
+			//std::cout<<"In Func energy: "<<gamTotalE<<std::endl;
+			}
+			
+		G4double getGamTotal (){
+				return gamTotalE;
+			}
+		
 
 	private:
 		void MiniballEndOfEventAction(const G4Event*);
@@ -42,6 +53,8 @@ class TRexEventAction : public MiniBallEventAction {
 
 		TRexDetectorConstruction* fDetectorConst;
 		MiniBallHistoManager* fMbHistoMan;
+		
+		G4double gamTotalE;
 
 		TTree* fTree;
 
