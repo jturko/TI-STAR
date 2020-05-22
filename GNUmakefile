@@ -2,7 +2,7 @@
 # GNUmakefile for MiniBall simluation example Ex04
 # Gabriele Cosmo, 06/04/98. Modifications by Hans Boie 
 # --------------------------------------------------------------
-#CPPVERBOSE := true
+CPPVERBOSE := true
 
 name := TRexGeant4
 G4TARGET := $(name)
@@ -13,10 +13,10 @@ ROOTLIBS     := $(shell root-config --libs)
 #ROOTGLIBS    := $(shell root-config --glibs)
 ROOTINC      := -I$(shell root-config --incdir)
 
-COMMON_DIR = $(HOME)/CommandLineInterface
+COMMON_DIR = $(HOME)/programs/CommandLineInterface
 LIB_DIR = $(HOME)/lib
 
-MBHOME := $(HOME)/Miniball
+MBHOME := $(HOME)/geant4_sims/Miniball
 
 MBINC := $(MBHOME)/include
 ifndef MBLIB
@@ -35,9 +35,8 @@ include $(G4INSTALL)/config/architecture.gmk
 EXTRA_INCLUDES = -I$(MBINC) -I$(COMMON_DIR)
 CPPFLAGS += -O0 -Wall -Wno-write-strings -Wno-deprecated -pedantic -g $(INCFLAGS) $(ROOTCFLAGS) $(EXTRA_INCLUDES) -DSIMULATION_PATH=\"$(PWD)\"
 CPPFLAGS += -pthread
-CPPFLAGS += -DG4MULTITHREADED
-LDFLAGS  += $(ROOTLIBS) -Wl,--no-as-needed $(G4TMP)/$(G4SYSTEM)/$(G4TARGET)/Dictionary.o -lG4OpenGL
-EXTRALIBS = -L$(MBLIB) -L$(LIB_DIR) -lMiniBall -lCommandLineInterface 
+LDFLAGS  += $(G4TMP)/$(G4SYSTEM)/$(G4TARGET)/Dictionary.o
+EXTRALIBS = -L$(MBLIB) -L$(LIB_DIR) -lMiniBall -lCommandLineInterface $(ROOTLIBS)
 
 EXTRA_LINK_DEPENDENCIES = $(G4TMP)/$(G4SYSTEM)/$(G4TARGET)/Dictionary.o
 

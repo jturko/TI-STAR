@@ -233,7 +233,7 @@ void myEmStandardPhysics::ConstructProcess()
       G4eMultipleScattering* msc = new G4eMultipleScattering;
       G4UrbanMscModel* msc1 = new G4UrbanMscModel();
       G4WentzelVIModel* msc2 = new G4WentzelVIModel();
-      msc1->SetNewDisplacementFlag(false);
+      //msc1->SetNewDisplacementFlag(false);
       msc1->SetHighEnergyLimit(highEnergyLimit);
       msc2->SetLowEnergyLimit(highEnergyLimit);
       msc->AddEmModel(0, msc1);
@@ -256,7 +256,7 @@ void myEmStandardPhysics::ConstructProcess()
       G4eMultipleScattering* msc = new G4eMultipleScattering;
       G4UrbanMscModel* msc1 = new G4UrbanMscModel();
       G4WentzelVIModel* msc2 = new G4WentzelVIModel();
-      msc1->SetNewDisplacementFlag(false);
+      //msc1->SetNewDisplacementFlag(false);
       msc1->SetHighEnergyLimit(highEnergyLimit);
       msc2->SetLowEnergyLimit(highEnergyLimit);
       msc->AddEmModel(0, msc1);
