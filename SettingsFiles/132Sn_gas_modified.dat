@@ -86,20 +86,20 @@ NbOfBBarrelErestSingles: 2
 
 ############################### first forward layer ####################################
 
-FBarrelDeltaESingles.0.Z: 41.0 	 in mm		#position of the centre forward
-FBarrelDeltaESingles.1.Z: 41.0	 
+FBarrelDeltaESingles.0.Z: 30.0 	 in mm		#position of the centre forward
+FBarrelDeltaESingles.1.Z: 30.0	 
 FBarrelDeltaESingles.0.DistanceToBeam: 10.0	in mm	#distance of first layer to beam axis
 FBarrelDeltaESingles.1.DistanceToBeam: 10.0	in mm
 FBarrelDeltaESingles.0.Thickness: 20 	in um		#thickness of first layer top & bottom
 FBarrelDeltaESingles.1.Thickness: 20 	in um
 
 FBarrelDeltaESinglesLength.X: 40.0	in mm		#dimensions of each detector panel in the first layer
-FBarrelDeltaESinglesLength.Y: 80.0
+FBarrelDeltaESinglesLength.Y: 50.0
 
 ################################# second forward layer #####################################
 
-SecondFBarrelDeltaESingles.0.Z:	41.0 	in mm
-SecondFBarrelDeltaESingles.1.Z:	41.0	
+SecondFBarrelDeltaESingles.0.Z:	25.0 	in mm
+SecondFBarrelDeltaESingles.1.Z:	25.0	
 SecondFBarrelDeltaESingles.0.DistanceToBeam: 30.0	in mm
 SecondFBarrelDeltaESingles.1.DistanceToBeam: 30.0	in mm
 
@@ -107,12 +107,12 @@ SecondFBarrelDeltaESingles.0.Thickness: 150  	in um
 SecondFBarrelDeltaESingles.1.Thickness: 150  	in um
 
 SecondFBarrelDeltaESinglesLength.X: 100.0	in mm
-SecondFBarrelDeltaESinglesLength.Y: 80.0
+SecondFBarrelDeltaESinglesLength.Y: 50.0
 
 ################################## third forward layer #################################
 
-FBarrelErestSingles.0.Z:	41.0	in mm
-FBarrelErestSingles.1.Z:	41.0 	
+FBarrelErestSingles.0.Z:	25.0	in mm
+FBarrelErestSingles.1.Z:	25.0 	
 FBarrelErestSingles.0.DistanceToBeam: 33.0	in mm
 FBarrelErestSingles.1.DistanceToBeam: 33.0	in mm
 
@@ -120,12 +120,12 @@ FBarrelErestSingles.0.Thickness: 2000.0  	in um
 FBarrelErestSingles.1.Thickness: 2000.0
 
 FBarrelErestSinglesLength.X: 100.0	in mm
-FBarrelErestSinglesLength.Y: 80.0
+FBarrelErestSinglesLength.Y: 50.0
 
 ############################### first backward layer ####################################
 
-BBarrelDeltaESingles.0.Z: -41.0 	 
-BBarrelDeltaESingles.1.Z: -41.0	 
+BBarrelDeltaESingles.0.Z: -30.0 	 
+BBarrelDeltaESingles.1.Z: -30.0	 
 BBarrelDeltaESingles.0.DistanceToBeam: 10.0	in mm
 BBarrelDeltaESingles.1.DistanceToBeam: 10.0	in mm
 
@@ -133,12 +133,12 @@ BBarrelDeltaESingles.0.Thickness: 20  in um
 BBarrelDeltaESingles.1.Thickness: 20  in um
 
 BBarrelDeltaESinglesLength.X: 40.0	in mm
-BBarrelDeltaESinglesLength.Y: 80.0
+BBarrelDeltaESinglesLength.Y: 50.0
 
 ############################### second backward layer ####################################
 
-SecondBBarrelDeltaESingles.0.Z:	-41.0 	
-SecondBBarrelDeltaESingles.1.Z:	-41.0		
+SecondBBarrelDeltaESingles.0.Z:	-25.0 	
+SecondBBarrelDeltaESingles.1.Z:	-25.0		
 SecondBBarrelDeltaESingles.0.DistanceToBeam: 30.0	in mm
 SecondBBarrelDeltaESingles.1.DistanceToBeam: 30.0	in mm
 
@@ -146,12 +146,12 @@ SecondBBarrelDeltaESingles.0.Thickness: 150  	in um
 SecondBBarrelDeltaESingles.1.Thickness: 150 	in um
 
 SecondBBarrelDeltaESinglesLength.X: 100.0	in mm
-SecondBBarrelDeltaESinglesLength.Y: 80.0
+SecondBBarrelDeltaESinglesLength.Y: 50.0
 
 ############################### third backward layer ####################################
 
-BBarrelErestSingles.0.Z: -41.0	in mm
-BBarrelErestSingles.1.Z: -41.0 	
+BBarrelErestSingles.0.Z: -25.0	in mm
+BBarrelErestSingles.1.Z: -25.0 	
 BBarrelErestSingles.0.DistanceToBeam: 33.0	in mm
 BBarrelErestSingles.1.DistanceToBeam: 33.0	in mm
 
@@ -159,7 +159,7 @@ BBarrelErestSingles.0.Thickness: 2000.0  	in um
 BBarrelErestSingles.1.Thickness: 2000.0
 
 BBarrelErestSinglesLength.X: 100.0	in mm
-BBarrelErestSinglesLength.Y: 80.0
+BBarrelErestSinglesLength.Y: 50.0
 
 NbOfMiniballClusters:		  0
 MiniballCluster.Rho.0:		110.  																
